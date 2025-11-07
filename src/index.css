@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&family=Open+Sans:wght@300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos globais personalizados */
+body {
+  font-family: 'Roboto', 'Open Sans', sans-serif;
+  line-height: 1.5;
+  background-color: #F5F5F5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', 'Roboto', sans-serif;
+}
+
+/* Melhorar a aparência dos inputs */
+input, select, textarea {
+  font-family: 'Roboto', 'Open Sans', sans-serif;
+}
+
+/* Foco personalizado */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  ring-width: 2px;
+  ring-color: #2E7D32;
+}
+
+/* Botões com transição suave */
+button {
+  transition: all 0.2s ease-in-out;
+}
