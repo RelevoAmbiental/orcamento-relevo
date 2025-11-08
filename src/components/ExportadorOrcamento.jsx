@@ -1,4 +1,3 @@
-// src/components/ExportadorOrcamento.jsx
 import React, { useState } from 'react';
 import { useOrcamento } from '../context/OrcamentoContext';
 import { gerarPDF, gerarCSV, downloadArquivo } from '../utils/exportadores';
@@ -17,7 +16,7 @@ const ExportadorOrcamento = () => {
     if (exportando) return;
     setExportando(true);
     try {
-      const doc = await gerarPDF(orcamentoAtual, totais);
+      const doc = await gerarPDF(orcamentoAtual, { ...totais });
       doc.save(`${nomeBase()}.pdf`);
     } finally {
       setExportando(false);
@@ -28,7 +27,7 @@ const ExportadorOrcamento = () => {
     if (exportando) return;
     setExportando(true);
     try {
-      const csv = await gerarCSV(orcamentoAtual, totais);
+      const csv = await gerarCSV(orcamentoAtual, { ...totais });
       downloadArquivo(`${nomeBase()}.csv`, csv, 'text/csv;charset=utf-8;');
     } finally {
       setExportando(false);
