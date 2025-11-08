@@ -6,5 +6,6 @@ export default defineConfig({
   base: '/', // raiz do domínio
   build: {
     outDir: 'dist',
+    sourcemap: false,
   },
 });
