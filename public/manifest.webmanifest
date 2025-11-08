@@ -1,7 +1,7 @@
 {
   "name": "Sistema de Orçamentos - Relevo",
   "short_name": "Orçamentos",
-  "start_url": "/orcamento-relevo/",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#047857",
