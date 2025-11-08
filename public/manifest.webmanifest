@@ -1,0 +1,16 @@
+{
+  "name": "Sistema de Orçamentos - Relevo",
+  "short_name": "Orçamentos",
+  "start_url": "/orcamento-relevo/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#047857",
+  "description": "Portal de orçamentos da Relevo Consultoria Ambiental",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
