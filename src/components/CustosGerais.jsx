@@ -111,7 +111,7 @@ const CustosGerais = () => {
               R$ {formatarValorBR(totais?.impostos || 0)}
             </div>
             <div className="text-xs text-gray-500">
-              {formatarPercentual(orcamentoAtual.parametros.imposto)}
+              {formatarPercentual(orcamentoAtual?.parametros?.imposto ?? 0)}
             </div>
           </div>
         </div>
