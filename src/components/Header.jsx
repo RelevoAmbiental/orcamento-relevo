@@ -1,4 +1,3 @@
-// src/components/Header.jsx
 import React, { useState } from 'react';
 import GerenciadorOrcamentos from './GerenciadorOrcamentos';
 import ExportadorOrcamento from './ExportadorOrcamento';
@@ -11,7 +10,11 @@ const Header = () => {
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-4">
           <div className="flex items-center gap-4">
-            <img src="https://relevo.eco.br/images/logo-relevo-200.png" alt="Relevo" className="h-10 w-auto" />
+            <img
+              src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png"
+              alt="Relevo"
+              className="h-10 w-auto"
+            />
             <div>
               <h1 className="text-2xl font-semibold text-gray-800">Sistema de Orçamentos</h1>
               <p className="text-sm text-gray-500">Relevo Consultoria Ambiental</p>
