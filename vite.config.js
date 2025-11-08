@@ -3,9 +3,15 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/', // <---- importante! raiz do domínio
+  base: '/', // raiz do domínio principal — certo!
   build: {
     outDir: 'dist',
     sourcemap: false,
+  },
+  server: {
+    mimeTypes: {
+      // garante que .jsx e .js sejam servidos corretamente no dev
+      'text/javascript': ['js', 'jsx'],
+    },
   },
 });
