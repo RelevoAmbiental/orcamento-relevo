@@ -251,7 +251,7 @@ const Header = () => {
           </h3>
           <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
             {/* Nome do Orçamento - 40% maior */}
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-5">
               <label className="block text-sm font-medium mb-2 text-white font-sans">
                 Nome do Orçamento *
               </label>
@@ -266,7 +266,7 @@ const Header = () => {
             </div>
             
             {/* Cliente - 40% maior */}
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-5">
               <label className="block text-sm font-medium mb-2 text-white font-sans">
                 Cliente *
               </label>
