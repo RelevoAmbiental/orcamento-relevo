@@ -38,45 +38,47 @@ const ExportadorOrcamento = () => {
     }
   };
 
-  return (
-    <div className="flex flex-col sm:flex-row gap-3">
-      <button
-        onClick={handleExportarPDF}
-        disabled={exportando || carregando}
-        className="px-6 py-3 text-[#333C35] bg-white border border-[rgba(0,0,0,0.1)] rounded-md hover:bg-[#F8F9F8] focus:outline-none focus:ring-2 focus:ring-[#2EAD60] focus:ring-offset-2 font-medium transition-all duration-200 shadow-md flex items-center justify-center gap-2 min-w-[140px] font-sans text-base disabled:opacity-50 disabled:cursor-not-allowed"
-        title="Exportar para PDF (formato de impressão)"
-      >
-        {exportando ? (
-          <>
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#333C35]"></div>
-            Gerando...
-          </>
-        ) : (
-          <>
-            📄 PDF
-          </>
-        )}
-      </button>
-      
-      <button
-        onClick={handleExportarCSV}
-        disabled={exportando || carregando}
-        className="px-6 py-3 text-[#333C35] bg-white border border-[rgba(0,0,0,0.1)] rounded-md hover:bg-[#F8F9F8] focus:outline-none focus:ring-2 focus:ring-[#2EAD60] focus:ring-offset-2 font-medium transition-all duration-200 shadow-md flex items-center justify-center gap-2 min-w-[140px] font-sans text-base disabled:opacity-50 disabled:cursor-not-allowed"
-        title="Exportar para CSV (Excel/Planilhas)"
-      >
-        {exportando ? (
-          <>
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#333C35]"></div>
-            Gerando...
-          </>
-        ) : (
-          <>
-            📊 CSV
-          </>
-        )}
-      </button>
-    </div>
-  );
+return (
+  <div className="flex flex-col sm:flex-row gap-3">
+    {/* PDF - Ação secundária (Verde escuro) */}
+    <button
+      onClick={handleExportarPDF}
+      disabled={exportando || carregando}
+      className="px-6 py-3 text-white bg-[#2E3E31] border border-[#2E3E31] rounded-md hover:bg-[#3CC373] focus:outline-none focus:ring-2 focus:ring-[#2EAD60] focus:ring-offset-2 font-medium transition-all duration-200 shadow-md flex items-center justify-center gap-2 min-w-[140px] font-sans text-base disabled:opacity-50 disabled:cursor-not-allowed"
+      title="Exportar para PDF (formato de impressão)"
+    >
+      {exportando ? (
+        <>
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          Gerando...
+        </>
+      ) : (
+        <>
+          📄 PDF
+        </>
+      )}
+    </button>
+    
+    {/* CSV - Ação secundária (Verde escuro) */}
+    <button
+      onClick={handleExportarCSV}
+      disabled={exportando || carregando}
+      className="px-6 py-3 text-white bg-[#2E3E31] border border-[#2E3E31] rounded-md hover:bg-[#3CC373] focus:outline-none focus:ring-2 focus:ring-[#2EAD60] focus:ring-offset-2 font-medium transition-all duration-200 shadow-md flex items-center justify-center gap-2 min-w-[140px] font-sans text-base disabled:opacity-50 disabled:cursor-not-allowed"
+      title="Exportar para CSV (Excel/Planilhas)"
+    >
+      {exportando ? (
+        <>
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          Gerando...
+        </>
+      ) : (
+        <>
+          📊 CSV
+        </>
+      )}
+    </button>
+  </div>
+);
 };
 
 export default ExportadorOrcamento;
