@@ -313,13 +313,18 @@ export const OrcamentoProvider = ({ children }) => {
     setErrosValidacao([]);
     
     try {
+      console.log('🚀 Carregando orçamento ID:', id);
       const orcamento = await orcamentoService.buscarOrcamento(id);
+      console.log('📦 Orçamento carregado:', orcamento);
+      
       if (orcamento) {
         dispatch({ type: 'CARREGAR_ORCAMENTO', payload: orcamento });
+        console.log('✅ Orçamento dispatchado para estado');
       }
       setCarregando(false);
       return orcamento;
     } catch (error) {
+      console.error('❌ Erro ao carregar orçamento:', error);
       setErro(error.message);
       setCarregando(false);
       throw error;
