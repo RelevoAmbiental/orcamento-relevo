@@ -4,14 +4,14 @@
 import React, { createContext, useContext, useReducer, useState, useMemo } from 'react';
 import { orcamentoService } from '../firebase/orcamentos';
 
-// ---------------- Estado inicial (como no projeto antigo) ----------------
-const initialState = {
+// ---------------- Estado inicial restaurado ----------------
+const estadoInicial = {
   metadata: {
-    nome: 'Novo Orçamento RIMA',
+    nome: 'Novo Orçamento',
     cliente: '',
     data: new Date().toISOString().split('T')[0],
     versao: '1.0',
-    desconto: 0, // em %
+    descontoPercentual: 0,
   },
   parametros: {
     imposto: 0.07,
@@ -22,51 +22,29 @@ const initialState = {
     comissaoCaptacao: 0.03,
   },
   coordenacao: [
-    { id: 1, cargo: 'Coordenador Geral',   profissional: 'Sênior', subtotal: 5000, quant: 1, dias: 30 },
+    { id: 1, cargo: 'Coordenador Geral', profissional: 'Sênior', subtotal: 5000, quant: 1, dias: 30 },
     { id: 2, cargo: 'Coordenador Técnico', profissional: 'Sênior', subtotal: 5000, quant: 1, dias: 30 },
-    { id: 3, cargo: 'Coordenador de Campo', profissional: 'Pleno', subtotal: 2000, quant: 0, dias: 30 },
+    { id: 3, cargo: 'Coordenador de Campo', profissional: 'Pleno', subtotal: 2000, quant: 0, dias: 30 }
   ],
   profissionais: [
-    { id: 1,  cargo: 'Geólogo I',              prolabore: 10000, pessoas: 0, dias: 0 },
-    { id: 2,  cargo: 'Geólogo II',             prolabore: 9000,  pessoas: 0, dias: 0 },
-    { id: 3,  cargo: 'Geofísico',              prolabore: 11000, pessoas: 0, dias: 0 },
-    { id: 4,  cargo: 'Biólogo-Invertebrado',   prolabore: 9000,  pessoas: 0, dias: 0 },
-    { id: 5,  cargo: 'Biólogo-vertebrado',     prolabore: 9000,  pessoas: 0, dias: 0 },
-    { id: 6,  cargo: 'Biólogo-geral',          prolabore: 9500,  pessoas: 0, dias: 0 },
-    { id: 7,  cargo: 'Arqueólogo',             prolabore: 9500,  pessoas: 0, dias: 0 },
-    { id: 8,  cargo: 'Sociólogo',              prolabore: 9500,  pessoas: 0, dias: 0 },
-    { id: 9,  cargo: 'Paleontólogo',           prolabore: 9500,  pessoas: 0, dias: 0 },
-    { id: 10, cargo: 'Engenheiro florestal',   prolabore: 9000,  pessoas: 0, dias: 0 },
-    { id: 11, cargo: 'Geoprocessamento',       prolabore: 9000,  pessoas: 0, dias: 0 },
-    { id: 12, cargo: 'Auxiliar de campo',      prolabore: 9000,  pessoas: 0, dias: 0 },
-    { id: 13, cargo: 'Administrador',          prolabore: 7000,  pessoas: 0, dias: 0 },
-    { id: 14, cargo: 'Croquista/topógrafo',    prolabore: 9000,  pessoas: 0, dias: 0 },
-    { id: 15, cargo: 'Outro profissional',     prolabore: 0,     pessoas: 0, dias: 0 },
+    { id: 1, cargo: 'Geólogo I', prolabore: 10000, pessoas: 0, dias: 0 },
+    { id: 2, cargo: 'Geólogo II', prolabore: 9000, pessoas: 0, dias: 0 },
+    { id: 3, cargo: 'Geofísico', prolabore: 11000, pessoas: 0, dias: 0 },
+    { id: 4, cargo: 'Biólogo - Invertebrado', prolabore: 9000, pessoas: 0, dias: 0 },
+    { id: 5, cargo: 'Biólogo - Vertebrado', prolabore: 9000, pessoas: 0, dias: 0 },
+    { id: 6, cargo: 'Arqueólogo', prolabore: 9500, pessoas: 0, dias: 0 },
+    { id: 7, cargo: 'Paleontólogo', prolabore: 9500, pessoas: 0, dias: 0 },
+    { id: 8, cargo: 'Auxiliar de Campo', prolabore: 6000, pessoas: 0, dias: 0 },
   ],
   valoresUnicos: [
-    { id: 1, item: 'ARTs/RRTs',                     valor: 300,  pessoas: 1, dias: 1 },
-    { id: 2, item: 'Relatórios Técnicos',           valor: 8000, pessoas: 1, dias: 1 },
-    { id: 3, item: 'Digitalização/Documentação',    valor: 50,   pessoas: 0, dias: 1 },
-    { id: 4, item: 'Amostras/Análises Laboratoriais', valor: 500, pessoas: 0, dias: 1 },
-    { id: 5, item: 'Outro valor único',             valor: 0,    pessoas: 1, dias: 1 },
+    { id: 1, item: 'ARTs/RRTs', valor: 300, pessoas: 1, dias: 1 },
+    { id: 2, item: 'Relatórios Técnicos', valor: 8000, pessoas: 1, dias: 1 },
+    { id: 3, item: 'Digitalização/Documentação', valor: 50, pessoas: 0, dias: 1 },
   ],
   logistica: [
-    { id: 1,  item: 'Alimentação',           valor: 100,  unidade: 'dia/pessoa',  qtd: 0, dias: 1 },
-    { id: 2,  item: 'Hospedagem',            valor: 170,  unidade: 'dia/pessoa',  qtd: 0, dias: 1 },
-    { id: 3,  item: 'Lavanderia',            valor: 150,  unidade: 'dia/pessoa',  qtd: 0, dias: 1 },
-    { id: 4,  item: 'Exame médico',          valor: 50,   unidade: 'pessoa',      qtd: 0, dias: 1 },
-    { id: 5,  item: 'Seguro de Vida',        valor: 50,   unidade: 'pessoa',      qtd: 1, dias: 1 },
-    { id: 6,  item: 'Combustível',           valor: 8,    unidade: 'dia/veículo', qtd: 1, dias: 1 },
-    { id: 7,  item: 'Manutenção veículo',    valor: 100,  unidade: 'mês/veículo', qtd: 1, dias: 1 },
-    { id: 8,  item: 'Veículo',               valor: 500,  unidade: 'dia',         qtd: 1, dias: 1 },
-    { id: 9,  item: 'Pedagios',              valor: 50,   unidade: 'dia/veículo', qtd: 0, dias: 1 },
-    { id: 10, item: 'Passagens aéreas',      valor: 1000, unidade: 'pessoa',      qtd: 0, dias: 1 },
-    { id: 11, item: 'Passagens Terrestres',  valor: 250,  unidade: 'pessoa',      qtd: 0, dias: 1 },
-    { id: 12, item: 'EPI',                   valor: 500,  unidade: 'pessoa',      qtd: 1, dias: 1 },
-    { id: 13, item: 'Aluguel de drone',      valor: 300,  unidade: 'dia',         qtd: 1, dias: 1 },
-    { id: 14, item: 'Material de escritório',valor: 1000, unidade: 'lote',        qtd: 1, dias: 1 },
-    { id: 15, item: 'Material de expediente',valor: 800,  unidade: 'lote',        qtd: 1, dias: 1 },
-    { id: 16, item: 'Outro item logística',  valor: 0,    unidade: 'unidade',     qtd: 1, dias: 1 },
+    { id: 1, item: 'Alimentação', valor: 120, unidade: 'dia/pessoa', qtd: 0, dias: 1 },
+    { id: 2, item: 'Hospedagem', valor: 200, unidade: 'dia/pessoa', qtd: 0, dias: 1 },
+    { id: 3, item: 'Veículo', valor: 400, unidade: 'dia', qtd: 0, dias: 1 },
   ],
 };
 
