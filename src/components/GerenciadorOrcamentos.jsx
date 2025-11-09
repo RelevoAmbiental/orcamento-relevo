@@ -28,9 +28,11 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
 
   const handleCarregar = async (id) => {
     try {
+      console.log('🆔 ID sendo passado para carregar:', id);
+      console.log('📋 Comparando com lista:', orcamentos.map(o => o.id));
+      
       await carregarOrcamento(id);
-      // Fechar modal após carregar
-      setMostrarGerenciador(false); // ← ADICIONE ESTA LINHA
+      setMostrarGerenciador(false);
     } catch (error) {
       console.error('Erro ao carregar orçamento:', error);
     }
