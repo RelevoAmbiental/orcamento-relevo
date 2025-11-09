@@ -1,4 +1,4 @@
-// src/firebase/config.js
+// src/firebase/config.js - ARQUIVO COMPLETO PARA SUBSTITUIR
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
