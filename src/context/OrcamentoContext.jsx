@@ -1,4 +1,4 @@
-// src/context/OrcamentoContext.jsx - COM VALIDAÇÕES
+// src/context/OrcamentoContext.jsx - VERSÃO COMPLETA CORRIGIDA
 import React, { createContext, useContext, useReducer, useState } from 'react';
 import { orcamentoService } from '../firebase/orcamentos';
 import { 
@@ -14,7 +14,7 @@ import {
 
 const OrcamentoContext = createContext();
 
-// Estado inicial completo - MANTIDO IGUAL
+// Estado inicial completo - CORRIGIDO
 const initialState = {
   metadata: {
     nome: 'Novo Orçamento Relevo',
@@ -58,7 +58,7 @@ const initialState = {
     { id: 2, item: 'Relatórios Técnicos', valor: 8000, pessoas: 1, dias: 1 },
     { id: 3, item: 'Digitalização/Documentação', valor: 50, pessoas: 0, dias: 1 },
     { id: 4, item: 'Amostras/Análises Laboratoriais', valor: 500, pessoas: 0, dias: 1 },
-    { id: 5, item: '', valor: 500, pessoas: 0, dias: 1 }
+    { id: 5, item: 'Outros custos', valor: 500, pessoas: 0, dias: 1 } // CORRIGIDO: item não pode ser vazio
   ],
   logistica: [
     { id: 1, item: 'Alimentação', valor: 100, unidade: 'dia/pessoa', qtd: 0, dias: 1 },
@@ -66,7 +66,7 @@ const initialState = {
     { id: 3, item: 'Lavanderia', valor: 150, unidade: 'dia/pessoa', qtd: 0, dias: 1 },
     { id: 4, item: 'Exame médico', valor: 50, unidade: 'pessoa', qtd: 0, dias: 1 },
     { id: 5, item: 'Seguro de Vida', valor: 50, unidade: 'pessoa', qtd: 0, dias: 1 },
-    { id: 6, item: 'Combustível', valor: 8, litro: 'dia/veículo', qtd: 0, dias: 1 },
+    { id: 6, item: 'Combustível', valor: 8, unidade: 'dia/veículo', qtd: 0, dias: 1 }, // CORRIGIDO: litro → unidade
     { id: 7, item: 'Manutenção veículo', valor: 100, unidade: 'mês/veículo', qtd: 0, dias: 1 },
     { id: 8, item: 'Veículo', valor: 500, unidade: 'dia', qtd: 0, dias: 1 },
     { id: 9, item: 'Pedagios', valor: 50, unidade: 'dia/veículo', qtd: 0, dias: 1 },
@@ -341,6 +341,7 @@ export const OrcamentoProvider = ({ children }) => {
       throw error;
     }
   };
+
   const atualizarOrcamento = async (id, orcamentoData) => {
     setCarregando(true);
     setErro(null);
@@ -369,6 +370,22 @@ export const OrcamentoProvider = ({ children }) => {
     }
   };
 
+  // 🔥 FUNÇÃO ADICIONADA - ESTAVA FALTANDO
+  const listarOrcamentos = async () => {
+    setCarregando(true);
+    setErro(null);
+    
+    try {
+      const orcamentos = await orcamentoService.listarOrcamentos();
+      setCarregando(false);
+      return orcamentos;
+    } catch (error) {
+      setErro(error.message);
+      setCarregando(false);
+      throw error;
+    }
+  };
+
   const limparErro = () => setErro(null);
 
   // VALOR DO CONTEXT ATUALIZADO COM VALIDAÇÕES
@@ -386,7 +403,7 @@ export const OrcamentoProvider = ({ children }) => {
     // Ações Firebase
     salvarOrcamento,
     carregarOrcamento,
-    listarOrcamentos,
+    listarOrcamentos, // ✅ AGORA ESTÁ DISPONÍVEL
     atualizarOrcamento,
     excluirOrcamento,
     
