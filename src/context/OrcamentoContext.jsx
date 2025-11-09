@@ -1,6 +1,6 @@
 // src/context/OrcamentoContext.jsx - COM VALIDAÇÕES
 import React, { createContext, useContext, useReducer, useState } from 'react';
-import { orcamentoService } from '../services/orcamentos';
+import { orcamentoService } from '../firebase/orcamentos';
 import { 
   validarOrcamentoCompleto, 
   orcamentoPodeSerSalvo,
