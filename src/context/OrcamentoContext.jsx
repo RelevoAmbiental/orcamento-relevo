@@ -51,14 +51,12 @@ const initialState = {
     { id: 12, cargo: 'Auxiliar de campo', prolabore: 9000, pessoas: 0, dias: 1 },
     { id: 13, cargo: 'Administrador', prolabore: 7000, pessoas: 0, dias: 1 },
     { id: 14, cargo: 'Croquista/topógrafo', prolabore: 9000, pessoas: 0, dias: 1 },
-    { id: 15, cargo: 'Outro profissional', prolabore: 0, pessoas: 0, dias: 1 }
   ],
   valoresUnicos: [
     { id: 1, item: 'ARTs/RRTs', valor: 300, pessoas: 1, dias: 1 },
     { id: 2, item: 'Relatórios Técnicos', valor: 8000, pessoas: 1, dias: 1 },
     { id: 3, item: 'Digitalização/Documentação', valor: 50, pessoas: 0, dias: 1 },
     { id: 4, item: 'Amostras/Análises Laboratoriais', valor: 500, pessoas: 0, dias: 1 },
-    { id: 5, item: 'Outros custos', valor: 500, pessoas: 0, dias: 1 } // CORRIGIDO: item não pode ser vazio
   ],
   logistica: [
     { id: 1, item: 'Alimentação', valor: 100, unidade: 'dia/pessoa', qtd: 0, dias: 1 },
@@ -76,7 +74,6 @@ const initialState = {
     { id: 13, item: 'Aluguel de drone', valor: 300, unidade: 'dia', qtd: 0, dias: 1 },
     { id: 14, item: 'Material de escritório', valor: 1000, unidade: 'lote', qtd: 0, dias: 1 },
     { id: 15, item: 'Material de expediente', valor: 800, unidade: 'lote', qtd: 0, dias: 1 },
-    { id: 16, item: 'Outro item logística', valor: 0, unidade: 'unidade', qtd: 0, dias: 1 }
   ]
 };
 
