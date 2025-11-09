@@ -16,10 +16,9 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
 
   const carregarLista = async () => {
     try {
-      console.log('🔄 Iniciando carregamento da lista...');
       const lista = await listarOrcamentos();
       
-      // 🔥 PREVENÇÃO: Remover duplicados por ID
+      // PREVENÇÃO: Remover duplicados por ID (mantemos esta proteção)
       const listaUnica = lista.reduce((acc, current) => {
         const x = acc.find(item => item.id === current.id);
         if (!x) {
@@ -28,13 +27,7 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
         return acc;
       }, []);
       
-      if (lista.length !== listaUnica.length) {
-        console.warn('⚠️ Foram encontrados e removidos duplicados na lista:', 
-          lista.length - listaUnica.length);
-      }
-      
       setOrcamentos(listaUnica);
-      console.log('✅ Lista carregada e limpa:', listaUnica.length, 'itens únicos');
       
     } catch (error) {
       console.error('Erro ao carregar lista:', error);
@@ -128,15 +121,6 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-relevo-text font-heading">Gerenciar Orçamentos</h2>
         <div className="flex gap-2">
-          {/* 🔍 BOTÃO DEBUG - REMOVER DEPOIS DE RESOLVER O PROBLEMA */}
-          <button
-            onClick={carregarLista}
-            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition font-sans text-sm"
-          >
-            🔍 Debug Estrutura
-          </button>
-          {/* FIM DEBUG */}
-          
           <button
             onClick={carregarLista}
             className="bg-relevo-green text-white px-4 py-2 rounded-lg hover:bg-relevo-green-light transition font-sans"
