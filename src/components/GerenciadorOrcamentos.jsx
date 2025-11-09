@@ -134,7 +134,10 @@ const GerenciadorOrcamentos = () => {
                 <td className="py-3 px-4">{orcamento.metadata?.nome || 'Sem nome'}</td>
                 <td className="py-3 px-4">{orcamento.metadata?.cliente || 'Não informado'}</td>
                 <td className="py-3 px-4">
-                  {orcamento.metadata?.data ? new Date(orcamento.metadata.data).toLocaleDateString('pt-BR') : 'Não informada'}
+                  {orcamento.metadata?.data ? 
+                    new Date(orcamento.metadata.data + 'T00:00:00').toLocaleDateString('pt-BR') 
+                    : 'Não informada'
+                  }
                 </td>
                 <td className="py-3 px-4 text-right font-semibold">
                   R$ {formatarValorBR(calcularTotal(orcamento))}
