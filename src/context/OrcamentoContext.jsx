@@ -2,167 +2,236 @@
 import React, { createContext, useContext, useMemo, useReducer, useState } from 'react';
 import { orcamentoService } from '../firebase/orcamentos';
 
-// ---------------- Utils ----------------
-const ensureArray = (v) => (Array.isArray(v) ? v : []);
-const withIds = (arr, prefix) =>
-  ensureArray(arr).map((it, idx) => ({
-    id: it?.id ?? `${prefix}-${idx + 1}`,
-    ...it,
-  }));
+// ---------- Utils seguras ----------
+const arr = (v) => (Array.isArray(v) ? v : []);
+const withId = (item, idx, prefix) => ({
+  id: item?.id ?? `${prefix}-${idx + 1}`,
+  ...item,
+});
 
-// Subtotais por seção (mantidos compatíveis)
-const subtotalCoordenacao = (i) => {
-  const dias = Number(i?.dias || 0);
-  const quant = Number(i?.quant || 0);
-  const subtotal = Number(i?.subtotal || 0); // mensal
-  const mes = dias / 30;
-  return mes * subtotal * quant;
-};
+// Normalizadores por seção (toleram esquemas antigos e valores faltantes)
+const normalizeCoordenacao = (lista) =>
+  arr(lista)
+    .filter(Boolean)
+    .map((it, idx) => ({
+      id: it.id ?? `coord-${idx + 1}`,
+      cargo: it.cargo ?? '',                          // só leitura na UI
+      profissional: it.profissional ?? '',            // texto editável (nível)
+      subtotal: Number(it.subtotal ?? it.valor ?? 0), // mensal
+      quant: Number(it.quant ?? it.qtd ?? 0),
+      dias: Number(it.dias ?? 0),
+    }));
 
-const subtotalProfissionais = (i) =>
-  Number(i?.prolabore || i?.valor || 0) *
-  Number(i?.pessoas || 1) *
-  (Number(i?.dias || 1) / 30);
+const normalizeProfissionais = (lista) =>
+  arr(lista)
+    .filter(Boolean)
+    .map((it, idx) => ({
+      id: it.id ?? `prof-${idx + 1}`,
+      cargo: it.cargo ?? '',
+      prolabore: Number(it.prolabore ?? it.valor ?? 0), // canônico: prolabore
+      pessoas: Number(it.pessoas ?? it.qtd ?? 0),
+      dias: Number(it.dias ?? 0),
+    }));
 
-const subtotalCustosGerais = (i) =>
-  Number(i?.valor || 0) * Number(i?.qtd || 1) * Number(i?.dias || 1);
+const normalizeValoresUnicos = (lista) =>
+  arr(lista)
+    .filter(Boolean)
+    .map((it, idx) => ({
+      id: it.id ?? `vu-${idx + 1}`,
+      item: it.item ?? '',
+      valor: Number(it.valor ?? 0),
+      pessoas: Number(it.pessoas ?? 1),
+      dias: Number(it.dias ?? 1),
+    }));
 
-const subtotalValoresUnicos = (i) =>
-  Number(i?.valor || 0) * Number(i?.pessoas || i?.qtd || 1) * Number(i?.dias || 1);
+const normalizeLogistica = (lista) =>
+  arr(lista)
+    .filter(Boolean)
+    .map((it, idx) => ({
+      id: it.id ?? `log-${idx + 1}`,
+      item: it.item ?? '',
+      valor: Number(it.valor ?? 0),
+      unidade: it.unidade ?? 'unidade',
+      qtd: Number(it.qtd ?? it.pessoas ?? 1),
+      dias: Number(it.dias ?? 1),
+    }));
 
-const subtotalLogistica = (i) =>
-  Number(i?.valor || 0) * Number(i?.qtd || 1) * Number(i?.dias || 1);
-
-// ---------------- Estado inicial ----------------
+// ---------- Estado inicial canônico ----------
 const estadoInicial = {
   metadata: {
-    nome: 'Novo Orçamento',
+    nome: '',
     cliente: '',
-    data: new Date().toISOString().split('T')[0],
-    descontoPercentual: 0,
+    data: '',
+    descontoPercentual: 0, // 0..100
   },
+  // Percentuais em decimal (0..1)
   parametros: {
-    imposto: 0.07,
-    lucro: 0.05,
-    fundoGiro: 0.05,
-    encargosPessoal: 0.10,
-    despesasFiscais: 0.03,
-    comissaoCaptacao: 0.03,
+    imposto: 0,
+    lucro: 0,
+    fundoGiro: 0,
+    encargosPessoal: 0,
+    despesasFiscais: 0,
+    comissaoCaptacao: 0,
   },
-  coordenacao: [
-    { id: 1, cargo: 'Coordenador Geral', profissional: 'Sênior', subtotal: 5000, quant: 1, dias: 30 },
-    { id: 2, cargo: 'Coordenador Técnico', profissional: 'Sênior', subtotal: 5000, quant: 1, dias: 30 },
-    { id: 3, cargo: 'Coordenador de Campo', profissional: 'Pleno', subtotal: 2000, quant: 0, dias: 30 }
-  ],
-  profissionais: [
-    { id: 1, cargo: 'Geólogo I', prolabore: 10000, pessoas: 0, dias: 0 },
-    { id: 2, cargo: 'Geólogo II', prolabore: 9000, pessoas: 0, dias: 0 },
-    { id: 3, cargo: 'Geofísico', prolabore: 11000, pessoas: 0, dias: 0 },
-    { id: 4, cargo: 'Biólogo-Invertebrado', prolabore: 9000, pessoas: 0, dias: 0 },
-    { id: 5, cargo: 'Biólogo-Vertebrado', prolabore: 9000, pessoas: 0, dias: 0 },
-    { id: 6, cargo: 'Biólogo-Geral', prolabore: 9500, pessoas: 0, dias: 0 },
-    { id: 7, cargo: 'Arqueólogo', prolabore: 9500, pessoas: 0, dias: 0 },
-    { id: 8, cargo: 'Sociólogo', prolabore: 9500, pessoas: 0, dias: 0 },
-    { id: 9, cargo: 'Paleontólogo', prolabore: 9500, pessoas: 0, dias: 0 },
-    { id: 10, cargo: 'Engenheiro Florestal', prolabore: 9000, pessoas: 0, dias: 0 },
-    { id: 11, cargo: 'Geoprocessamento', prolabore: 9000, pessoas: 0, dias: 0 },
-    { id: 12, cargo: 'Auxiliar de Campo', prolabore: 9000, pessoas: 0, dias: 0 },
-    { id: 13, cargo: 'Administrador', prolabore: 7000, pessoas: 0, dias: 0 },
-    { id: 14, cargo: 'Croquista/Topógrafo', prolabore: 9000, pessoas: 0, dias: 0 },
-    { id: 15, cargo: 'Outro Profissional', prolabore: 0, pessoas: 0, dias: 0 }
-  ],
-  valoresUnicos: [
-    { id: 1, item: 'ARTs/RRTs', valor: 300, pessoas: 1, dias: 1 },
-    { id: 2, item: 'Relatórios Técnicos', valor: 8000, pessoas: 1, dias: 1 },
-    { id: 3, item: 'Digitalização/Documentação', valor: 50, pessoas: 0, dias: 1 },
-    { id: 4, item: 'Amostras/Análises Laboratoriais', valor: 500, pessoas: 0, dias: 1 },
-    { id: 5, item: 'Outro Valor Único', valor: 0, pessoas: 1, dias: 1 }
-  ],
-  logistica: [
-    { id: 1, item: 'Alimentação', valor: 100, unidade: 'dia/pessoa', qtd: 0, dias: 1 },
-    { id: 2, item: 'Hospedagem', valor: 170, unidade: 'dia/pessoa', qtd: 0, dias: 1 },
-    { id: 3, item: 'Lavanderia', valor: 150, unidade: 'dia/pessoa', qtd: 0, dias: 1 },
-    { id: 4, item: 'Exame Médico', valor: 50, unidade: 'pessoa', qtd: 0, dias: 1 },
-    { id: 5, item: 'Seguro de Vida', valor: 50, unidade: 'pessoa', qtd: 1, dias: 1 },
-    { id: 6, item: 'Combustível', valor: 8, unidade: 'dia/veículo', qtd: 1, dias: 1 },
-    { id: 7, item: 'Manutenção Veículo', valor: 100, unidade: 'mês/veículo', qtd: 1, dias: 1 },
-    { id: 8, item: 'Veículo', valor: 500, unidade: 'dia', qtd: 1, dias: 1 },
-    { id: 9, item: 'Pedágios', valor: 50, unidade: 'dia/veículo', qtd: 0, dias: 1 },
-    { id: 10, item: 'Passagens Aéreas', valor: 1000, unidade: 'pessoa', qtd: 0, dias: 1 },
-    { id: 11, item: 'Passagens Terrestres', valor: 250, unidade: 'pessoa', qtd: 0, dias: 1 },
-    { id: 12, item: 'EPI', valor: 500, unidade: 'pessoa', qtd: 1, dias: 1 },
-    { id: 13, item: 'Aluguel de Drone', valor: 300, unidade: 'dia', qtd: 1, dias: 1 },
-    { id: 14, item: 'Material de Escritório', valor: 1000, unidade: 'lote', qtd: 1, dias: 1 },
-    { id: 15, item: 'Material de Expediente', valor: 800, unidade: 'lote', qtd: 1, dias: 1 },
-    { id: 16, item: 'Outro Item Logística', valor: 0, unidade: 'unidade', qtd: 1, dias: 1 }
-  ],
-  custosGerais: [],
+  coordenacao: [],
+  profissionais: [],
+  valoresUnicos: [],
+  logistica: [],
 };
 
-// ---------------- Normalização ----------------
+// ---------- Normalização do estado completo ----------
 const normalizeState = (raw) => {
-  const payload = raw || {};
+  const p = raw || {};
   return {
     ...estadoInicial,
-    ...payload,
-    metadata: { ...estadoInicial.metadata, ...(payload.metadata || {}) },
-    parametros: { ...estadoInicial.parametros, ...(payload.parametros || {}) },
-    custosGerais: withIds(payload.custosGerais ?? estadoInicial.custosGerais, 'cg'),
-    coordenacao: withIds(payload.coordenacao ?? estadoInicial.coordenacao, 'coord'),
-    profissionais: withIds(payload.profissionais ?? estadoInicial.profissionais, 'prof'),
-    valoresUnicos: withIds(payload.valoresUnicos ?? estadoInicial.valoresUnicos, 'vu'),
-    logistica: withIds(payload.logistica ?? estadoInicial.logistica, 'log'),
+    ...p,
+    metadata: { ...estadoInicial.metadata, ...(p.metadata || {}) },
+    parametros: { ...estadoInicial.parametros, ...(p.parametros || {}) },
+
+    // Seções saneadas + compatíveis com componentes atuais
+    coordenacao: normalizeCoordenacao(p.coordenacao),
+    profissionais: normalizeProfissionais(p.profissionais),
+    valoresUnicos: normalizeValoresUnicos(p.valoresUnicos),
+    logistica: normalizeLogistica(p.logistica),
   };
 };
 
-// ---------------- Reducer ----------------
+// ---------- Reducer ----------
 function reducer(state, action) {
   switch (action.type) {
-    case 'SET_ALL':
+    case 'SET_ALL': {
       return normalizeState(action.payload);
-    case 'ATUALIZAR_METADATA':
+    }
+
+    case 'ATUALIZAR_METADATA': {
       return { ...state, metadata: { ...state.metadata, ...action.payload } };
-    case 'UPDATE_PARAMETROS':
+    }
+
+    case 'UPDATE_PARAMETROS': {
       return { ...state, parametros: { ...state.parametros, ...(action.payload || {}) } };
-    case 'UPDATE_COORDENACAO':
-      const { id, updates } = action.payload;
-      return {
-        ...state,
-        coordenacao: state.coordenacao.map((i) => (i.id === id ? { ...i, ...updates } : i)),
-      };
+    }
+
+    // Coordenacao
+    case 'UPDATE_COORDENACAO': {
+      const { id, updates } = action.payload || {};
+      const lista = state.coordenacao.map((it, idx) =>
+        it.id === id || idx === id ? { ...it, ...(updates || {}) } : it
+      );
+      return { ...state, coordenacao: normalizeCoordenacao(lista) };
+    }
+    case 'ADD_COORDENACAO': {
+      const item = normalizeCoordenacao([action.payload?.item || {}])[0];
+      const lista = [...state.coordenacao, withId(item, state.coordenacao.length, 'coord')];
+      return { ...state, coordenacao: lista };
+    }
+    case 'REMOVE_COORDENACAO': {
+      const { id } = action.payload || {};
+      const lista = state.coordenacao.filter((it, idx) => it.id !== id && idx !== id);
+      return { ...state, coordenacao: lista };
+    }
+
+    // Profissionais
+    case 'UPDATE_PROFISSIONAIS': {
+      const { id, updates } = action.payload || {};
+      const lista = state.profissionais.map((it, idx) =>
+        it.id === id || idx === id ? { ...it, ...(updates || {}) } : it
+      );
+      return { ...state, profissionais: normalizeProfissionais(lista) };
+    }
+    case 'ADD_PROFISSIONAIS': {
+      const item = normalizeProfissionais([action.payload?.item || {}])[0];
+      const lista = [...state.profissionais, withId(item, state.profissionais.length, 'prof')];
+      return { ...state, profissionais: lista };
+    }
+    case 'REMOVE_PROFISSIONAIS': {
+      const { id } = action.payload || {};
+      const lista = state.profissionais.filter((it, idx) => it.id !== id && idx !== id);
+      return { ...state, profissionais: lista };
+    }
+
+    // Logística
+    case 'UPDATE_LOGISTICA': {
+      const { id, updates } = action.payload || {};
+      const lista = state.logistica.map((it, idx) =>
+        it.id === id || idx === id ? { ...it, ...(updates || {}) } : it
+      );
+      return { ...state, logistica: normalizeLogistica(lista) };
+    }
+    case 'ADD_LOGISTICA': {
+      const item = normalizeLogistica([action.payload?.item || {}])[0];
+      const lista = [...state.logistica, withId(item, state.logistica.length, 'log')];
+      return { ...state, logistica: lista };
+    }
+    case 'REMOVE_LOGISTICA': {
+      const { id } = action.payload || {};
+      const lista = state.logistica.filter((it, idx) => it.id !== id && idx !== id);
+      return { ...state, logistica: lista };
+    }
+
+    // Valores únicos
+    case 'UPDATE_VALORES_UNICOS': {
+      const { id, updates } = action.payload || {};
+      const lista = state.valoresUnicos.map((it, idx) =>
+        it.id === id || idx === id ? { ...it, ...(updates || {}) } : it
+      );
+      return { ...state, valoresUnicos: normalizeValoresUnicos(lista) };
+    }
+    case 'ADD_VALORES_UNICOS': {
+      const item = normalizeValoresUnicos([action.payload?.item || {}])[0];
+      const lista = [...state.valoresUnicos, withId(item, state.valoresUnicos.length, 'vu')];
+      return { ...state, valoresUnicos: lista };
+    }
+    case 'REMOVE_VALORES_UNICOS': {
+      const { id } = action.payload || {};
+      const lista = state.valoresUnicos.filter((it, idx) => it.id !== id && idx !== id);
+      return { ...state, valoresUnicos: lista };
+    }
+
     default:
       return state;
   }
 }
 
-// ---------------- Cálculo de totais ----------------
-function calcularTotais(orc) {
-  const stCoordenacao = ensureArray(orc.coordenacao).reduce((a, i) => a + subtotalCoordenacao(i), 0);
-  const stProfissionais = ensureArray(orc.profissionais).reduce((a, i) => a + subtotalProfissionais(i), 0);
-  const stCustosGerais = ensureArray(orc.custosGerais).reduce((a, i) => a + subtotalCustosGerais(i), 0);
-  const stValoresUnicos = ensureArray(orc.valoresUnicos).reduce((a, i) => a + subtotalValoresUnicos(i), 0);
-  const stLogistica = ensureArray(orc.logistica).reduce((a, i) => a + subtotalLogistica(i), 0);
+// ---------- Cálculos canônicos ----------
+const sum = (xs) => xs.reduce((a, b) => a + b, 0);
 
-  const custosOperacionais = stCustosGerais + stLogistica + stValoresUnicos;
+function calcularTotais(orc) {
+  const c = normalizeCoordenacao(orc.coordenacao);
+  const p = normalizeProfissionais(orc.profissionais);
+  const vu = normalizeValoresUnicos(orc.valoresUnicos);
+  const lg = normalizeLogistica(orc.logistica);
+
+  const stCoordenacao = sum(
+    c.map((i) => (Number(i.dias || 0) / 30) * Number(i.subtotal || 0) * Number(i.quant || 0))
+  );
+  const stProfissionais = sum(
+    p.map((i) => (Number(i.dias || 0) / 30) * Number(i.prolabore || 0) * Number(i.pessoas || 0))
+  );
+  const stValoresUnicos = sum(vu.map((i) => Number(i.valor || 0) * Number(i.pessoas || 1) * Number(i.dias || 1)));
+  const stLogistica = sum(lg.map((i) => Number(i.valor || 0) * Number(i.qtd || 1) * Number(i.dias || 1)));
+
+  const custosOperacionais = stValoresUnicos + stLogistica;
   const honorarios = stCoordenacao + stProfissionais;
   const base = custosOperacionais + honorarios;
 
-  const impostos = base * orc.parametros.imposto;
-  const lucro = base * orc.parametros.lucro;
-  const fundoGiro = base * orc.parametros.fundoGiro;
-  const encargosPessoal = base * orc.parametros.encargosPessoal;
-  const despesasFiscais = base * orc.parametros.despesasFiscais;
-  const comissaoCaptacao = base * orc.parametros.comissaoCaptacao;
+  const impostos         = base * Number(orc.parametros.imposto || 0);
+  const lucro            = base * Number(orc.parametros.lucro || 0);
+  const fundoGiro        = base * Number(orc.parametros.fundoGiro || 0);
+  const encargosPessoal  = base * Number(orc.parametros.encargosPessoal || 0);
+  const despesasFiscais  = base * Number(orc.parametros.despesasFiscais || 0);
+  const comissaoCaptacao = base * Number(orc.parametros.comissaoCaptacao || 0);
 
   const totalIndiretos = impostos + lucro + fundoGiro + encargosPessoal + despesasFiscais + comissaoCaptacao;
-  const total = base + totalIndiretos;
-  const desconto = total * (orc.metadata.descontoPercentual / 100);
-  const totalComDesconto = total - desconto;
+
+  const bdi = 0; // se houver regra específica, ajustar aqui
+  const total = base + totalIndiretos + bdi;
+
+  const descontoPct = Number(orc.metadata.descontoPercentual || 0) / 100;
+  const totalComDesconto = total * (1 - (descontoPct > 0 ? descontoPct : 0));
 
   return {
     subtotalCoordenacao: stCoordenacao,
     subtotalProfissionais: stProfissionais,
-    subtotalCustosGerais: stCustosGerais,
     subtotalValoresUnicos: stValoresUnicos,
     subtotalLogistica: stLogistica,
     custosOperacionais,
@@ -175,25 +244,27 @@ function calcularTotais(orc) {
     despesasFiscais,
     comissaoCaptacao,
     totalIndiretos,
+    bdi,
     total,
-    desconto,
     totalComDesconto,
   };
 }
 
-// ---------------- Contexto ----------------
+// ---------- Contexto ----------
 const OrcamentoContext = createContext(null);
 
 export const OrcamentoProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, estadoInicial);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState(null);
+
   const totais = useMemo(() => calcularTotais(state), [state]);
 
-  // Firestore
+  // --- Firestore ---
   const listarOrcamentos = async () => {
     try {
       setCarregando(true);
+      setErro(null);
       const docs = await orcamentoService.listarOrcamentos();
       return docs;
     } catch (e) {
@@ -207,6 +278,7 @@ export const OrcamentoProvider = ({ children }) => {
   const carregarOrcamento = async (id) => {
     try {
       setCarregando(true);
+      setErro(null);
       const doc = await orcamentoService.carregarOrcamento(id);
       if (doc) dispatch({ type: 'SET_ALL', payload: doc });
       return !!doc;
@@ -218,10 +290,25 @@ export const OrcamentoProvider = ({ children }) => {
     }
   };
 
+  const excluirOrcamento = async (id) => {
+    try {
+      setCarregando(true);
+      setErro(null);
+      await orcamentoService.excluirOrcamento(id);
+      return true;
+    } catch (e) {
+      setErro(e?.message || 'Erro ao excluir orçamento');
+      return false;
+    } finally {
+      setCarregando(false);
+    }
+  };
+
   const salvarOrcamento = async (id = null) => {
     try {
       setCarregando(true);
-      const payload = { ...state };
+      setErro(null);
+      const payload = normalizeState(state); // garante shape salvo limpo
       if (id) {
         await orcamentoService.atualizarOrcamento(id, payload);
         return id;
@@ -232,19 +319,6 @@ export const OrcamentoProvider = ({ children }) => {
     } catch (e) {
       setErro(e?.message || 'Erro ao salvar orçamento');
       return null;
-    } finally {
-      setCarregando(false);
-    }
-  };
-
-  const excluirOrcamento = async (id) => {
-    try {
-      setCarregando(true);
-      await orcamentoService.excluirOrcamento(id);
-      return true;
-    } catch (e) {
-      setErro(e?.message || 'Erro ao excluir orçamento');
-      return false;
     } finally {
       setCarregando(false);
     }
