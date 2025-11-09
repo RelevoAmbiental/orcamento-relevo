@@ -100,13 +100,20 @@ function orcamentoReducer(state, action) {
       );
       return { ...state, coordenacao: coordenacaoAtualizada };
 
-    case 'UPDATE_PROFISSIONAIS':
-      const profissionaisAtualizados = state.profissionais.map(item =>
-        item.id === action.payload.id
-          ? { ...item, ...action.payload.updates }
-          : item
-      );
-      return { ...state, profissionais: profissionaisAtualizados };
+  case 'UPDATE_PROFISSIONAIS':
+    const itemExistenteProfissionais = state.profissionais.find(item => item.id === action.payload.id);
+    if (!itemExistenteProfissionais) {
+      return {
+        ...state,
+        profissionais: [...state.profissionais, { id: action.payload.id, ...action.payload.updates }]
+      };
+    }
+    const profissionaisAtualizados = state.profissionais.map(item =>
+      item.id === action.payload.id
+        ? { ...item, ...action.payload.updates }
+        : item
+    );
+    return { ...state, profissionais: profissionaisAtualizados };
 
     case 'UPDATE_VALORES_UNICOS':
       const itemExistenteValores = state.valoresUnicos.find(item => item.id === action.payload.id);
