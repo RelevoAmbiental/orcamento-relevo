@@ -40,11 +40,6 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
 
   const handleCarregar = async (id) => {
     try {
-      // 🔍 DEBUG - REMOVER DEPOIS DE RESOLVER O PROBLEMA
-      console.log('🆔 [DEBUG] ID sendo passado para carregar:', id);
-      console.log('📋 [DEBUG] Comparando com lista:', orcamentos.map(o => o.id));
-      // FIM DEBUG
-      
       await carregarOrcamento(id);
       setMostrarGerenciador(false);
     } catch (error) {
