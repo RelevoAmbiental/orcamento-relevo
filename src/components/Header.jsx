@@ -273,7 +273,7 @@ const Header = () => {
                 ×
               </button>
             </div>
-            <GerenciadorOrcamentos />
+            <GerenciadorOrcamentos setMostrarGerenciador={setMostrarGerenciador} />
           </div>
         </div>
       )}
