@@ -172,7 +172,7 @@ const Coordenacao = () => {
           </tbody>
           <tfoot>
             <tr className="bg-[#2EAD60] font-semibold font-sans">
-              <td colSpan="6" className="px-4 py-2 text-right text-white">Total Coordenação:</td>
+              <td colSpan="7" className="px-4 py-2 text-right text-white">Total Coordenação:</td>
               <td className="px-4 py-2 text-sm text-white">
                 R$ {formatarValorBR(totais?.subtotalCoordenacao || 0)}
               </td>
