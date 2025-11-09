@@ -162,8 +162,10 @@ const Header = () => {
           <button
             onClick={handleSave}
             disabled={carregando || !podeSalvar}
-            className={`px-6 py-3 text-white rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 font-medium transition-all duration-200 shadow-md flex items-center justify-center gap-2 min-w-[160px] font-sans ${
-              !podeSalvar ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-relevo-green'
+            className={`px-6 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 font-medium transition-all duration-200 shadow-md flex items-center justify-center gap-2 min-w-[140px] font-sans text-base ${
+              !podeSalvar 
+                ? 'opacity-50 cursor-not-allowed bg-gray-400 text-white' 
+                : 'bg-[#2EAD60] hover:bg-[#3CC373] text-white focus:ring-[#2EAD60]'
             }`}
             title={!podeSalvar ? 'Corrija os erros de validação para salvar' : 'Salvar orçamento no Firebase'}
           >
@@ -174,26 +176,25 @@ const Header = () => {
               </>
             ) : (
               <>
-                {podeSalvar ? '💾 Salvar' : '❌ Corrija os Erros'}
+                {podeSalvar ? '💾 Salvar' : '❌ Corrigir'}
               </>
             )}
           </button>
           
           <button
             onClick={() => setMostrarGerenciador(true)}
-            className="px-6 py-3 text-white rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 font-medium transition-all duration-200 shadow-md min-w-[120px] bg-relevo-blue font-sans"
+            className="px-6 py-3 text-[#333C35] bg-white border border-[rgba(0,0,0,0.1)] rounded-md hover:bg-[#F8F9F8] focus:outline-none focus:ring-2 focus:ring-[#2EAD60] focus:ring-offset-2 font-medium transition-all duration-200 shadow-md min-w-[140px] font-sans text-base"
           >
             📋 Gerenciar
           </button>
           
           <button
             onClick={handleNovoOrcamento}
-            className="px-6 py-3 text-white rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 font-medium transition-all duration-200 shadow-md min-w-[100px] bg-relevo-orange font-sans"
+            className="px-6 py-3 text-[#333C35] bg-white border border-[rgba(0,0,0,0.1)] rounded-md hover:bg-[#F8F9F8] focus:outline-none focus:ring-2 focus:ring-[#2EAD60] focus:ring-offset-2 font-medium transition-all duration-200 shadow-md min-w-[140px] font-sans text-base"
           >
             🆕 Novo
           </button>
         </div>
-      </div>
 
       <div className="bg-relevo-light-gray rounded-lg p-6 mb-6">
         <div className="max-w-4xl mx-auto">
