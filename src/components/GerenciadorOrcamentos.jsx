@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useOrcamento } from '../context/OrcamentoContext'; // ← CORRETO: importar useOrcamento
 import { formatarValorBR } from '../utils/formatters';
 
-const GerenciadorOrcamentos = () => {
+const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
   const { 
     listarOrcamentos, 
     carregarOrcamento, 
@@ -30,7 +30,8 @@ const GerenciadorOrcamentos = () => {
   const handleCarregar = async (id) => {
     try {
       await carregarOrcamento(id);
-      // Fechar modal será feito pelo componente pai (Header)
+      // Fechar modal após carregar
+      setMostrarGerenciador(false); // ← ADICIONE ESTA LINHA
     } catch (error) {
       console.error('Erro ao carregar orçamento:', error);
     }
