@@ -1,7 +1,8 @@
-// src/components/GerenciadorOrcamentos.jsx - VERSÃO CORRIGIDA
+// src/components/GerenciadorOrcamentos.jsx - VERSÃO COMPLETA COM DEBUG
 import React, { useState, useEffect } from 'react';
-import { useOrcamento } from '../context/OrcamentoContext'; // ← CORRETO: importar useOrcamento
+import { useOrcamento } from '../context/OrcamentoContext';
 import { formatarValorBR } from '../utils/formatters';
+
 const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
   const { 
     listarOrcamentos, 
@@ -17,6 +18,29 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
     try {
       const lista = await listarOrcamentos();
       setOrcamentos(lista);
+      
+      // 🔍 DEBUG - REMOVER DEPOIS DE RESOLVER O PROBLEMA
+      console.log('🔍 [DEBUG] DIAGNÓSTICO - Estrutura dos orçamentos:');
+      lista.forEach((orc, index) => {
+        console.log(`--- ORÇAMENTO ${index + 1} (${orc.id}) ---`);
+        console.log('Metadata:', orc.metadata);
+        console.log('Tem coordenacao?:', orc.coordenacao?.length || 0, 'itens');
+        console.log('Tem profissionais?:', orc.profissionais?.length || 0, 'itens');
+        console.log('Estrutura resumida:', {
+          metadata: orc.metadata,
+          coordenacaoCount: orc.coordenacao?.length,
+          profissionaisCount: orc.profissionais?.length,
+          valoresUnicosCount: orc.valoresUnicos?.length,
+          logisticaCount: orc.logistica?.length,
+          parametros: !!orc.parametros
+        });
+        // Verifica se há dados específicos
+        if (orc.coordenacao && orc.coordenacao.length > 0) {
+          console.log('📊 Primeiro item coordenação:', orc.coordenacao[0]);
+        }
+      });
+      // FIM DEBUG
+      
     } catch (error) {
       console.error('Erro ao carregar lista:', error);
     }
@@ -28,8 +52,10 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
 
   const handleCarregar = async (id) => {
     try {
-      console.log('🆔 ID sendo passado para carregar:', id);
-      console.log('📋 Comparando com lista:', orcamentos.map(o => o.id));
+      // 🔍 DEBUG - REMOVER DEPOIS DE RESOLVER O PROBLEMA
+      console.log('🆔 [DEBUG] ID sendo passado para carregar:', id);
+      console.log('📋 [DEBUG] Comparando com lista:', orcamentos.map(o => o.id));
+      // FIM DEBUG
       
       await carregarOrcamento(id);
       setMostrarGerenciador(false);
@@ -42,7 +68,7 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
     if (confirm(`Tem certeza que deseja excluir o orçamento "${nome}"?`)) {
       try {
         await excluirOrcamento(id);
-        await carregarLista(); // Recarregar lista
+        await carregarLista();
       } catch (error) {
         console.error('Erro ao excluir orçamento:', error);
       }
@@ -55,62 +81,74 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
       const meses = item.dias / 30;
       return total + (meses * item.subtotal * item.quant);
     }, 0) || 0;
-  
+
     const subtotalProfissionais = orcamento.profissionais?.reduce((total, item) => {
       const meses = item.dias / 30;
       return total + (meses * item.prolabore * item.pessoas);
     }, 0) || 0;
-  
+
     const subtotalValoresUnicos = orcamento.valoresUnicos?.reduce((total, item) => {
       return total + (item.valor * item.pessoas * item.dias);
     }, 0) || 0;
-  
+
     const subtotalLogistica = orcamento.logistica?.reduce((total, item) => {
       return total + (item.valor * item.qtd * item.dias);
     }, 0) || 0;
-  
+
     const subtotalGeral = subtotalCoordenacao + subtotalProfissionais + subtotalValoresUnicos + subtotalLogistica;
-  
+
     const baseFolhaPagamento = subtotalCoordenacao + subtotalProfissionais;
     const encargosPessoal = baseFolhaPagamento * (orcamento.parametros?.encargosPessoal || 0);
-  
+
     const custoTotal = subtotalGeral + encargosPessoal;
-  
+
     const lucro = custoTotal * (orcamento.parametros?.lucro || 0);
     const fundoGiro = custoTotal * (orcamento.parametros?.fundoGiro || 0);
-  
+
     const subtotalComLucroFundo = custoTotal + lucro + fundoGiro;
-  
+
     const impostos = subtotalComLucroFundo * (orcamento.parametros?.imposto || 0);
-  
+
     const despesasFiscais = custoTotal * (orcamento.parametros?.despesasFiscais || 0);
     const comissaoCaptacao = custoTotal * (orcamento.parametros?.comissaoCaptacao || 0);
-  
+
     const totalAntesDesconto = subtotalComLucroFundo + impostos + despesasFiscais + comissaoCaptacao;
-  
+
     const desconto = totalAntesDesconto * ((orcamento.metadata?.desconto || 0) / 100);
     const totalGeral = totalAntesDesconto - desconto;
-  
+
     return totalGeral;
   };
-    if (carregando) {
-      return (
-        <div className="flex justify-center items-center p-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-        </div>
-      );
-    }
+
+  if (carregando) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-relevo-text font-heading">Gerenciar Orçamentos</h2>
-        <button
-          onClick={carregarLista}
-          className="bg-relevo-green text-white px-4 py-2 rounded-lg hover:bg-relevo-green-light transition font-sans"
-        >
-          Atualizar Lista
-        </button>
+        <div className="flex gap-2">
+          {/* 🔍 BOTÃO DEBUG - REMOVER DEPOIS DE RESOLVER O PROBLEMA */}
+          <button
+            onClick={carregarLista}
+            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition font-sans text-sm"
+          >
+            🔍 Debug Estrutura
+          </button>
+          {/* FIM DEBUG */}
+          
+          <button
+            onClick={carregarLista}
+            className="bg-relevo-green text-white px-4 py-2 rounded-lg hover:bg-relevo-green-light transition font-sans"
+          >
+            Atualizar Lista
+          </button>
+        </div>
       </div>
 
       {erro && (
@@ -172,12 +210,6 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
         )}
       </div>
     </div>
-    <button
-      onClick={() => import('../utils/debugFirebase').then(m => m.debugFirebase())}
-      className="bg-gray-500 text-white px-3 py-1 rounded text-sm"
-    >
-      🔍 Debug Firebase
-    </button>
   );
 };
 
