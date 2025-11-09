@@ -243,15 +243,15 @@ const Header = () => {
         </div>
       </div>
 
-      {/* SEÇÃO INFORMAÇÕES DO ORÇAMENTO - COM CORES RELEVO */}
+      {/* SEÇÃO INFORMAÇÕES DO ORÇAMENTO - LAYOUT OTIMIZADO */}
       <div className="bg-[#2EAD60] rounded-lg p-6 mb-6">
-        <div className="max-w-4xl mx-auto">
-          <h3 className="text-lg font-semibold text-white mb-4 text-center font-heading">
+        <div className="w-full">
+          <h3 className="text-lg font-semibold text-white mb-6 text-center font-heading">
             Informações do Orçamento
           </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
-            {/* Nome do Orçamento - 40% maior */}
-            <div className="lg:col-span-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            {/* Nome do Orçamento - 35% */}
+            <div className="lg:col-span-5">
               <label className="block text-sm font-medium mb-2 text-white font-sans">
                 Nome do Orçamento *
               </label>
@@ -265,8 +265,8 @@ const Header = () => {
               <p className="text-xs text-white/80 mt-1">Mínimo 3 caracteres</p>
             </div>
             
-            {/* Cliente - 40% maior */}
-            <div className="lg:col-span-4">
+            {/* Cliente - 35% */}
+            <div className="lg:col-span-5">
               <label className="block text-sm font-medium mb-2 text-white font-sans">
                 Cliente *
               </label>
@@ -280,8 +280,8 @@ const Header = () => {
               <p className="text-xs text-white/80 mt-1">Obrigatório</p>
             </div>
             
-            {/* Data - tamanho normal (20%) */}
-            <div className="lg:col-span-1">
+            {/* Data - 15% */}
+            <div className="lg:col-span-2">
               <label className="block text-sm font-medium mb-2 text-white font-sans">
                 Data *
               </label>
@@ -289,13 +289,13 @@ const Header = () => {
                 type="date"
                 value={orcamentoAtual.metadata.data}
                 onChange={(e) => handleMetadataChange('data', e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CC373] transition-colors text-sm font-sans text-gray-900"
+                className="w-full px-3 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CC373] transition-colors text-sm font-sans text-gray-900"
               />
               <p className="text-xs text-white/80 mt-1">Obrigatório</p>
             </div>
       
-            {/* Desconto - tamanho normal (20%) */}
-            <div className="lg:col-span-1">
+            {/* Desconto - 15% */}
+            <div className="lg:col-span-2">
               <label className="block text-sm font-medium mb-2 text-white font-sans">
                 Desconto (%)
               </label>
@@ -305,7 +305,7 @@ const Header = () => {
                 max="100"
                 value={orcamentoAtual.metadata.desconto}
                 onChange={(e) => handleMetadataChange('desconto', e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CC373] transition-colors text-sm font-sans text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CC373] transition-colors text-sm font-sans text-gray-900 placeholder-gray-500"
                 placeholder="0"
               />
               <p className="text-xs text-white/80 mt-1">0 a 100</p>
