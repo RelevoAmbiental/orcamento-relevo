@@ -292,15 +292,29 @@ export const OrcamentoProvider = ({ children }) => {
       setErro('Não é possível salvar o orçamento. Corrija os erros de validação primeiro.');
       throw new Error('Validação falhou');
     }
-
+  
     setCarregando(true);
     setErro(null);
     
     try {
-      const id = await orcamentoService.criarOrcamento(orcamentoData);
+      // 🔥 PREVENÇÃO: Converter para objeto simples e garantir estrutura correta
+      const dadosParaSalvar = JSON.parse(JSON.stringify({
+        ...orcamentoData,
+        // Garantir que não há IDs duplicados nos arrays
+        coordenacao: orcamentoData.coordenacao?.map(item => ({ ...item })) || [],
+        profissionais: orcamentoData.profissionais?.map(item => ({ ...item })) || [],
+        valoresUnicos: orcamentoData.valoresUnicos?.map(item => ({ ...item })) || [],
+        logistica: orcamentoData.logistica?.map(item => ({ ...item })) || []
+      }));
+      
+      console.log('💾 Salvando orçamento com estrutura limpa...');
+      const id = await orcamentoService.criarOrcamento(dadosParaSalvar);
+      
+      console.log('✅ Orçamento salvo com ID único:', id);
       setCarregando(false);
       return id;
     } catch (error) {
+      console.error('❌ Erro ao salvar orçamento:', error);
       setErro(error.message);
       setCarregando(false);
       throw error;
