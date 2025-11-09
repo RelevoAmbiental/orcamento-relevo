@@ -29,6 +29,23 @@ const Profissionais = () => {
     });
   };
 
+  // Função para adicionar novo profissional
+  const adicionarNovoProfissional = () => {
+    const novoId = Math.max(...orcamentoAtual.profissionais.map(item => item.id)) + 1;
+    dispatch({
+      type: 'UPDATE_PROFISSIONAIS',
+      payload: {
+        id: novoId,
+        updates: {
+          cargo: 'Novo Profissional',
+          prolabore: 0,
+          pessoas: 0,
+          dias: 0
+        }
+      }
+    });
+  };
+
   // Função para obter classe CSS baseada na validação
   const getInputClassName = (id, field, value) => {
     const erro = validators.profissionais[field]?.(value);
@@ -41,7 +58,16 @@ const Profissionais = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 className="text-xl font-bold text-relevo-text font-heading">Profissionais</h2>
+      {/* CABEÇALHO COM BOTÃO */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-relevo-text font-heading">Profissionais</h2>
+        <button
+          onClick={adicionarNovoProfissional}
+          className="bg-[#2EAD60] hover:bg-[#3CC373] text-white font-bold py-2 px-4 rounded text-sm transition-colors font-sans"
+        >
+          + Adicionar Profissional
+        </button>
+      </div>
       
       <div className="overflow-x-auto">
         <table className="w-full">
@@ -78,7 +104,13 @@ const Profissionais = () => {
                 >
                   <td className="px-4 py-2 text-sm">
                     <div className="flex items-center">
-                      {item.cargo}
+                      <input
+                        type="text"
+                        value={item.cargo}
+                        onChange={(e) => handleProfissionalChange(item.id, 'cargo', e.target.value)}
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="Nome do cargo"
+                      />
                       {temErro && (
                         <span className="ml-2 text-red-500 text-xs" title="Verifique os valores deste profissional">
                           ⚠️
@@ -164,7 +196,6 @@ const Profissionais = () => {
           </tfoot>
         </table>
       </div>
-
     </div>
   );
 };
