@@ -313,14 +313,25 @@ export const OrcamentoProvider = ({ children }) => {
     setErrosValidacao([]);
     
     try {
-      console.log('🚀 Carregando orçamento ID:', id);
+      console.log('🚀 INICIANDO carregamento do orçamento ID:', id);
       const orcamento = await orcamentoService.buscarOrcamento(id);
-      console.log('📦 Orçamento carregado:', orcamento);
+      console.log('📦 Dados recebidos do Firebase:', orcamento);
       
       if (orcamento) {
+        console.log('🔄 Dispatchando CARREGAR_ORCAMENTO...');
+        console.log('📊 Dados que serão dispatchados:', {
+          metadata: orcamento.metadata,
+          coordenacao: orcamento.coordenacao?.length,
+          profissionais: orcamento.profissionais?.length
+        });
+        
         dispatch({ type: 'CARREGAR_ORCAMENTO', payload: orcamento });
-        console.log('✅ Orçamento dispatchado para estado');
+        
+        console.log('✅ Dispatch completo. Estado atualizado.');
+      } else {
+        console.warn('⚠️ Orçamento NULO recebido do Firebase');
       }
+      
       setCarregando(false);
       return orcamento;
     } catch (error) {
@@ -330,22 +341,6 @@ export const OrcamentoProvider = ({ children }) => {
       throw error;
     }
   };
-
-  const listarOrcamentos = async () => {
-    setCarregando(true);
-    setErro(null);
-    
-    try {
-      const orcamentos = await orcamentoService.listarOrcamentos();
-      setCarregando(false);
-      return orcamentos;
-    } catch (error) {
-      setErro(error.message);
-      setCarregando(false);
-      throw error;
-    }
-  };
-
   const atualizarOrcamento = async (id, orcamentoData) => {
     setCarregando(true);
     setErro(null);
