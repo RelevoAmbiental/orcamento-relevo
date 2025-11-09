@@ -17,7 +17,7 @@ const OrcamentoContext = createContext();
 // Estado inicial completo - CORRIGIDO
 const initialState = {
   metadata: {
-    nome: 'Novo Orçamento Relevo',
+    nome: '',
     cliente: '',
     data: new Date().toISOString().split('T')[0],
     versao: '1.0',
