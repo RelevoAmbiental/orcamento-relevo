@@ -18,33 +18,26 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
     try {
       console.log('🔄 Iniciando carregamento da lista...');
       const lista = await listarOrcamentos();
-      console.log('✅ Lista carregada:', lista.length, 'itens');
-      setOrcamentos(lista);
       
-      // 🔍 DEBUG - VERSÃO MAIS SEGURA
-      if (lista && lista.length > 0) {
-        console.log('🔍 [DEBUG] DIAGNÓSTICO - Estrutura dos orçamentos:');
-        lista.forEach((orc, index) => {
-          console.log(`--- ORÇAMENTO ${index + 1} (${orc.id}) ---`);
-          console.log('📝 Metadata:', orc.metadata);
-          console.log('👥 Coordenacao:', orc.coordenacao?.length || 0, 'itens');
-          console.log('💼 Profissionais:', orc.profissionais?.length || 0, 'itens');
-          console.log('💰 Valores Únicos:', orc.valoresUnicos?.length || 0, 'itens');
-          console.log('🚗 Logística:', orc.logistica?.length || 0, 'itens');
-          console.log('⚙️ Parâmetros:', orc.parametros ? 'SIM' : 'NÃO');
-          
-          // Verificação específica do primeiro item de cada array
-          if (orc.coordenacao && orc.coordenacao.length > 0) {
-            console.log('📊 Primeiro coordenador:', orc.coordenacao[0]);
-          }
-        });
-      } else {
-        console.log('📭 Nenhum orçamento encontrado para debug');
+      // 🔥 PREVENÇÃO: Remover duplicados por ID
+      const listaUnica = lista.reduce((acc, current) => {
+        const x = acc.find(item => item.id === current.id);
+        if (!x) {
+          return acc.concat([current]);
+        }
+        return acc;
+      }, []);
+      
+      if (lista.length !== listaUnica.length) {
+        console.warn('⚠️ Foram encontrados e removidos duplicados na lista:', 
+          lista.length - listaUnica.length);
       }
-      // FIM DEBUG
+      
+      setOrcamentos(listaUnica);
+      console.log('✅ Lista carregada e limpa:', listaUnica.length, 'itens únicos');
       
     } catch (error) {
-      console.error('❌ Erro ao carregar lista:', error);
+      console.error('Erro ao carregar lista:', error);
     }
   };
 
