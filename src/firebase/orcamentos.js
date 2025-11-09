@@ -1,105 +1,61 @@
 // src/firebase/orcamentos.js
-// Serviço centralizado de interação com o Firestore para os orçamentos
+// Serviços de CRUD para orçamentos armazenados no Firestore
 
 import {
   getFirestore,
   collection,
+  addDoc,
   getDocs,
   getDoc,
-  addDoc,
+  doc,
   updateDoc,
   deleteDoc,
-  doc,
-  serverTimestamp,
-} from 'firebase/firestore';
-import { db } from './firebaseConfig'; // importa a instância configurada do Firestore
+} from "firebase/firestore";
 
-const COLLECTION = 'orcamentos';
+import { firebaseApp } from "./firebaseConfig";
 
-/**
- * Normaliza o documento para evitar campos undefined e manter compatibilidade com o contexto
- */
-const normalizeDoc = (docSnap) => {
-  if (!docSnap.exists()) return null;
-  const data = docSnap.data();
-  return {
-    id: docSnap.id,
-    ...data,
-  };
-};
+const db = getFirestore(firebaseApp);
+const collectionName = "orcamentos";
+const orcamentosRef = collection(db, collectionName);
 
-/**
- * Lista todos os orçamentos
- * @returns {Promise<Array>} lista de orçamentos [{id, metadata, parametros, ...}]
- */
-async function listarOrcamentos() {
-  const ref = collection(db, COLLECTION);
-  const snapshot = await getDocs(ref);
-  return snapshot.docs.map(normalizeDoc).sort((a, b) => {
-    const dataA = new Date(a?.metadata?.data || 0);
-    const dataB = new Date(b?.metadata?.data || 0);
-    return dataB - dataA; // mais recentes primeiro
-  });
-}
-
-/**
- * Carrega um orçamento pelo ID
- * @param {string} id - ID do documento
- * @returns {Promise<Object|null>}
- */
-async function carregarOrcamento(id) {
-  if (!id) throw new Error('ID do orçamento não informado.');
-  const ref = doc(db, COLLECTION, id);
-  const snap = await getDoc(ref);
-  return normalizeDoc(snap);
-}
-
-/**
- * Cria um novo orçamento
- * @param {Object} data - Estrutura completa do orçamento
- * @returns {Promise<string>} ID gerado
- */
-async function criarOrcamento(data) {
-  const ref = collection(db, COLLECTION);
-  const docRef = await addDoc(ref, {
-    ...data,
-    criadoEm: serverTimestamp(),
-    atualizadoEm: serverTimestamp(),
-  });
+// Cria um novo orçamento
+export async function criarOrcamento(data) {
+  const docRef = await addDoc(orcamentosRef, data);
   return docRef.id;
 }
 
-/**
- * Atualiza um orçamento existente
- * @param {string} id - ID do documento
- * @param {Object} data - Estrutura completa atualizada
- * @returns {Promise<void>}
- */
-async function atualizarOrcamento(id, data) {
-  if (!id) throw new Error('ID do orçamento não informado.');
-  const ref = doc(db, COLLECTION, id);
-  await updateDoc(ref, {
-    ...data,
-    atualizadoEm: serverTimestamp(),
-  });
+// Atualiza um orçamento existente
+export async function atualizarOrcamento(id, data) {
+  const ref = doc(db, collectionName, id);
+  await updateDoc(ref, data);
 }
 
-/**
- * Exclui um orçamento
- * @param {string} id - ID do documento
- * @returns {Promise<void>}
- */
-async function excluirOrcamento(id) {
-  if (!id) throw new Error('ID do orçamento não informado.');
-  const ref = doc(db, COLLECTION, id);
+// Carrega um orçamento específico
+export async function carregarOrcamento(id) {
+  const ref = doc(db, collectionName, id);
+  const snapshot = await getDoc(ref);
+  return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
+}
+
+// Lista todos os orçamentos
+export async function listarOrcamentos() {
+  const snapshot = await getDocs(orcamentosRef);
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+// Exclui um orçamento
+export async function excluirOrcamento(id) {
+  const ref = doc(db, collectionName, id);
   await deleteDoc(ref);
 }
 
-// Exporta como um serviço organizado
+// Exporta um objeto padrão para facilitar o uso no contexto
 export const orcamentoService = {
-  listarOrcamentos,
-  carregarOrcamento,
   criarOrcamento,
   atualizarOrcamento,
+  carregarOrcamento,
+  listarOrcamentos,
   excluirOrcamento,
 };
+
+export default orcamentoService;
