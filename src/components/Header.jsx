@@ -195,7 +195,52 @@ const Header = () => {
             🆕 Novo
           </button>
         </div>
+      </div>
 
+      {/* RESUMO DE VALORES NO HEADER */}
+      <div className="bg-white rounded-lg shadow-sm border border-relevo-border p-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+          <div>
+            <div className="text-sm text-relevo-text/70 font-sans">Subtotal</div>
+            <div className="text-lg font-bold text-relevo-blue font-sans">
+              R$ {formatarValorBR(totais?.subtotalGeral || 0)}
+            </div>
+          </div>
+          <div>
+            <div className="text-sm text-relevo-text/70 font-sans">Custos Indiretos</div>
+            <div className="text-lg font-bold text-relevo-orange font-sans">
+              R$ {formatarValorBR((totais?.totalAntesDesconto || 0) - (totais?.subtotalGeral || 0))}
+            </div>
+          </div>
+          <div>
+            <div className="text-sm text-relevo-text/70 font-sans">Total</div>
+            <div className="text-lg font-bold text-relevo-green font-sans">
+              R$ {formatarValorBR(totais?.totalGeral || 0)}
+            </div>
+          </div>
+          {orcamentoAtual.metadata.desconto > 0 && (
+            <div>
+              <div className="text-sm text-relevo-text/70 font-sans">Desconto Aplicado</div>
+              <div className="text-lg font-bold text-relevo-orange font-sans">
+                -R$ {formatarValorBR(totais?.desconto || 0)}
+              </div>
+              <div className="text-xs text-relevo-orange font-sans">
+                {orcamentoAtual.metadata.desconto}% de desconto
+              </div>
+            </div>
+          )}
+          <div>
+            <div className="text-sm text-relevo-text/70 font-sans">Margem</div>
+            <div className="text-lg font-bold font-sans" style={{
+              color: totais?.lucro > 0 ? '#2E7D32' : '#FF6B35'
+            }}>
+              {((totais?.lucro / (totais?.totalGeral || 1)) * 100).toFixed(1).replace('.', ',')}%
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* SEÇÃO INFORMAÇÕES DO ORÇAMENTO */}
       <div className="bg-relevo-light-gray rounded-lg p-6 mb-6">
         <div className="max-w-4xl mx-auto">
           <h3 className="text-lg font-semibold text-relevo-text mb-4 text-center font-heading">
@@ -285,48 +330,6 @@ const Header = () => {
           <button onClick={limparErro} className="absolute top-1 right-2 text-red-700 font-bold">x</button>
         </div>
       )}
-           {/* RESUMO DE VALORES NO HEADER - VERSÃO CORRIGIDA */}
-      <div className="bg-white rounded-lg shadow-sm border border-relevo-border p-4 mb-4">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
-          <div>
-            <div className="text-sm text-relevo-text/70 font-sans">Subtotal</div>
-            <div className="text-lg font-bold text-relevo-blue font-sans">
-              R$ {formatarValorBR(totais?.subtotalGeral || 0)}
-            </div>
-          </div>
-          <div>
-            <div className="text-sm text-relevo-text/70 font-sans">Custos Indiretos</div>
-            <div className="text-lg font-bold text-relevo-orange font-sans">
-              R$ {formatarValorBR((totais?.totalAntesDesconto || 0) - (totais?.subtotalGeral || 0))}
-            </div>
-          </div>
-          <div>
-            <div className="text-sm text-relevo-text/70 font-sans">Total</div>
-            <div className="text-lg font-bold text-relevo-green font-sans">
-              R$ {formatarValorBR(totais?.totalGeral || 0)}
-            </div>
-          </div>
-          {orcamentoAtual.metadata.desconto > 0 && (
-            <div>
-              <div className="text-sm text-relevo-text/70 font-sans">Desconto Aplicado</div>
-              <div className="text-lg font-bold text-relevo-orange font-sans">
-                -R$ {formatarValorBR(totais?.desconto || 0)}
-              </div>
-              <div className="text-xs text-relevo-orange font-sans">
-                {orcamentoAtual.metadata.desconto}% de desconto
-              </div>
-            </div>
-          )}
-          <div>
-            <div className="text-sm text-relevo-text/70 font-sans">Margem</div>
-            <div className="text-lg font-bold font-sans" style={{
-              color: totais?.lucro > 0 ? '#2E7D32' : '#FF6B35'
-            }}>
-              {((totais?.lucro / (totais?.totalGeral || 1)) * 100).toFixed(1).replace('.', ',')}%
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
