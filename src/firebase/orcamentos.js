@@ -41,6 +41,13 @@ export const orcamentoService = {
       }));
       
       console.log(`${orcamentos.length} orçamentos encontrados`);
+      
+      // 👇 ADICIONE ESTES LOGS PARA DEBUG
+      console.log('📋 IDs dos orçamentos encontrados:');
+      orcamentos.forEach(orc => {
+        console.log(`- ID: ${orc.id}, Nome: ${orc.metadata?.nome}`);
+      });
+      
       return orcamentos;
     } catch (error) {
       console.error('Erro ao listar orçamentos:', error);
