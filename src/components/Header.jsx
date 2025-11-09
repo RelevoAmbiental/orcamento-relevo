@@ -249,9 +249,9 @@ const Header = () => {
           <h3 className="text-lg font-semibold text-white mb-4 text-center font-heading">
             Informações do Orçamento
           </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            {/* Nome do Orçamento - 50% maior */}
-            <div className="lg:col-span-5">
+          <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
+            {/* Nome do Orçamento - 40% maior */}
+            <div className="lg:col-span-4">
               <label className="block text-sm font-medium mb-2 text-white font-sans">
                 Nome do Orçamento *
               </label>
@@ -265,8 +265,8 @@ const Header = () => {
               <p className="text-xs text-white/80 mt-1">Mínimo 3 caracteres</p>
             </div>
             
-            {/* Cliente - 50% maior */}
-            <div className="lg:col-span-5">
+            {/* Cliente - 40% maior */}
+            <div className="lg:col-span-4">
               <label className="block text-sm font-medium mb-2 text-white font-sans">
                 Cliente *
               </label>
@@ -280,7 +280,7 @@ const Header = () => {
               <p className="text-xs text-white/80 mt-1">Obrigatório</p>
             </div>
             
-            {/* Data - tamanho normal */}
+            {/* Data - tamanho normal (20%) */}
             <div className="lg:col-span-1">
               <label className="block text-sm font-medium mb-2 text-white font-sans">
                 Data *
@@ -293,8 +293,8 @@ const Header = () => {
               />
               <p className="text-xs text-white/80 mt-1">Obrigatório</p>
             </div>
-          
-            {/* Desconto - tamanho normal */}
+      
+            {/* Desconto - tamanho normal (20%) */}
             <div className="lg:col-span-1">
               <label className="block text-sm font-medium mb-2 text-white font-sans">
                 Desconto (%)
