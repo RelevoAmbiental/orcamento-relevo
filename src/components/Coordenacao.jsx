@@ -49,14 +49,14 @@ const Coordenacao = () => {
         <table className="w-full">
           <thead>
             <tr className="bg-relevo-light-gray">
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Cargo</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Profissional</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Subtotal (R$)</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Quant.</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Dias</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Horas</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Mês</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Total (R$)</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Cargo</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Profissional</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Subtotal (R$)</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Quant.</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Dias</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Horas</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Mês</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Total (R$)</th>
             </tr>
           </thead>
           <tbody>
@@ -171,9 +171,9 @@ const Coordenacao = () => {
             })}
           </tbody>
           <tfoot>
-            <tr className="bg-gray-100 font-semibold">
-              <td colSpan="7" className="px-4 py-2 text-right">Total Coordenação:</td>
-              <td className="px-4 py-2 text-sm">
+            <tr className="bg-[#2EAD60] font-semibold font-sans">
+              <td colSpan="6" className="px-4 py-2 text-right text-white">Total Coordenação:</td>
+              <td className="px-4 py-2 text-sm text-white">
                 R$ {formatarValorBR(totais?.subtotalCoordenacao || 0)}
               </td>
             </tr>
