@@ -63,14 +63,14 @@ const Coordenacao = () => {
             {orcamentoAtual.coordenacao.map((item) => {
               const horas = item.dias * 8 * item.quant;
               const mes = item.dias / 30;
-              const total = mes * item.subtotal * item.quant;
+              const total = mes * item.prolabore * item.quant;
               
               // Validar campos numéricos
-              const erroSubtotal = validators.coordenacao.subtotal(item.subtotal);
+              const erroProlabore = validators.coordenacao.subtotal(item.prolabore);
               const erroQuant = validators.coordenacao.quant(item.quant);
               const erroDias = validators.coordenacao.dias(item.dias);
               
-              const temErro = erroSubtotal || erroQuant || erroDias;
+              const temErro = erroProlabore || erroQuant || erroDias;
               
               return (
                 <tr 
@@ -110,9 +110,9 @@ const Coordenacao = () => {
                         type="number"
                         min="0"
                         step="100"
-                        value={item.subtotal}
+                        value={item.prolabore}
                         onChange={(e) => handleCoordenacaoChange(item.id, 'prolabore', e.target.value)}
-                        className={getInputClassName('subtotal', item.subtotal)}
+                        className={getInputClassName('prolabore', item.prolabore)}
                         title={erroSubtotal || "Valor mensal do coordenador"}
                       />
                       {erroSubtotal && (
