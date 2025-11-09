@@ -32,9 +32,9 @@ const initialState = {
     comissaoCaptacao: 0.03
   },
   coordenacao: [
-    { id: 1, cargo: 'Coordenador Geral', profissional: 'Sênior', subtotal: 5000, quant: 1, dias: 30 },
-    { id: 2, cargo: 'Coordenador Técnico', profissional: 'Sênior', subtotal: 5000, quant: 1, dias: 30 },
-    { id: 3, cargo: 'Coordenador de Campo', profissional: 'Pleno', subtotal: 2000, quant: 0, dias: 30 }
+    { id: 1, cargo: 'Coordenador Geral', profissional: 'Sênior', prolabore: 5000, quant: 1, dias: 30 },
+    { id: 2, cargo: 'Coordenador Técnico', profissional: 'Sênior', prolabore: 5000, quant: 1, dias: 30 },
+    { id: 3, cargo: 'Coordenador de Campo', profissional: 'Pleno', prolabore: 2000, quant: 0, dias: 30 }
   ],
   profissionais: [
     { id: 1, cargo: 'Geólogo I', prolabore: 10000, pessoas: 0, dias: 1 },
@@ -166,7 +166,7 @@ function orcamentoReducer(state, action) {
 const calcularTotais = (state) => {
   const subtotalCoordenacao = state.coordenacao.reduce((total, item) => {
     const meses = item.dias / 30;
-    return total + (meses * item.subtotal * item.quant);
+    return total + (meses * item.prolabore * item.quant);
   }, 0);
 
   const subtotalProfissionais = state.profissionais.reduce((total, item) => {
