@@ -1,25 +1,21 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-// ⚙️ Configuração do Vite para domínio próprio (orcamento.relevo.eco.br)
+// Detecta automaticamente o domínio de produção
+const baseUrl =
+  process.env.NODE_ENV === 'production'
+    ? '/' // domínio personalizado: orcamento.relevo.eco.br
+    : '/'
+
 export default defineConfig({
   plugins: [react()],
-  base: '/', // raiz do domínio — mantenha assim
+  base: baseUrl,
   build: {
     outDir: 'dist',
     sourcemap: false,
-    emptyOutDir: true, // limpa a pasta dist antes de cada build
-    rollupOptions: {
-      output: {
-        // Garante nomes limpos e cache-friendly no GitHub Pages
-        entryFileNames: 'assets/[name].js',
-        chunkFileNames: 'assets/[name].js',
-        assetFileNames: 'assets/[name].[ext]',
-      },
-    },
   },
   server: {
-    port: 5173, // opcional para dev local
+    port: 5173,
     open: true,
   },
-});
+})
