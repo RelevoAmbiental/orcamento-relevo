@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useOrcamento } from '../context/OrcamentoContext'; // ← CORRETO: importar useOrcamento
 import { formatarValorBR } from '../utils/formatters';
-
 const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
   const { 
     listarOrcamentos, 
