@@ -65,8 +65,8 @@ const Coordenacao = () => {
               const mes = item.dias / 30;
               const total = mes * item.prolabore * item.quant;
               
-              // Validar campos numéricos
-              const erroProlabore = validators.coordenacao.subtotal(item.prolabore);
+              // Validar campos numéricos - CORRIGIDO: usando 'prolabore' em vez de 'subtotal'
+              const erroProlabore = validators.coordenacao.prolabore ? validators.coordenacao.prolabore(item.prolabore) : null;
               const erroQuant = validators.coordenacao.quant(item.quant);
               const erroDias = validators.coordenacao.dias(item.dias);
               
@@ -103,7 +103,7 @@ const Coordenacao = () => {
                     />
                   </td>
                   
-                  {/* SUBTOTAL */}
+                  {/* PROLABORE - CORRIGIDO: todas as referências a erroSubtotal foram trocadas por erroProlabore */}
                   <td className="px-4 py-2 text-sm">
                     <div className="relative">
                       <input
@@ -113,11 +113,11 @@ const Coordenacao = () => {
                         value={item.prolabore}
                         onChange={(e) => handleCoordenacaoChange(item.id, 'prolabore', e.target.value)}
                         className={getInputClassName('prolabore', item.prolabore)}
-                        title={erroSubtotal || "Valor mensal do coordenador"}
+                        title={erroProlabore || "Valor mensal do coordenador"}
                       />
-                      {erroSubtotal && (
+                      {erroProlabore && (
                         <div className="absolute -top-6 left-0 bg-red-500 text-white text-xs px-2 py-1 rounded pointer-events-none opacity-0 hover:opacity-100 transition-opacity">
-                          {erroSubtotal}
+                          {erroProlabore}
                         </div>
                       )}
                     </div>
