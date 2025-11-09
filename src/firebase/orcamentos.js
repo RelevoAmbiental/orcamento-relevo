@@ -12,20 +12,23 @@ export const orcamentoService = {
     try {
       console.log('Salvando orçamento no Firebase...', orcamentoData);
       
-      const docRef = await addDoc(orcamentosRef, {
-        ...orcamentoData,
-        criadoEm: new Date(),
-        atualizadoEm: new Date(),
-        versao: orcamentoData.metadata?.versao || 1
-      });
-      
-      console.log('Orçamento salvo com ID:', docRef.id);
-      return docRef.id;
-    } catch (error) {
-      console.error('Erro ao criar orçamento:', error);
-      throw new Error(`Falha ao salvar orçamento: ${error.message}`);
-    }
-  },
+    // 👇 ADICIONE APENAS ESTA LINHA (NÃO altera o salvamento)
+        console.log('🔍 Estrutura completa sendo salva:', JSON.stringify(orcamentoData, null, 2));
+        
+        const docRef = await addDoc(orcamentosRef, {
+          ...orcamentoData,
+          criadoEm: new Date(),
+          atualizadoEm: new Date(),
+          versao: orcamentoData.metadata?.versao || 1
+        });
+        
+        console.log('Orçamento salvo com ID:', docRef.id);
+        return docRef.id;
+      } catch (error) {
+        console.error('Erro ao criar orçamento:', error);
+        throw new Error(`Falha ao salvar orçamento: ${error.message}`);
+      }
+    },
 
   // Buscar todos os orçamentos
   async listarOrcamentos() {
