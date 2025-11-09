@@ -102,7 +102,7 @@ export const validators = {
   coordenacao: {
     quant: (value) => validators.minValue(value, 0, 'Quantidade'),
     dias: (value) => validators.minValue(value, 0, 'Dias'),
-    subtotal: (value) => validators.minValue(value, 0, 'Subtotal')
+    prolabore: (value) => validators.minValue(value, 0, 'Prolabore')
   },
 
   // Validações para profissionais
@@ -222,8 +222,8 @@ export const validarCoordenacao = (coordenacao) => {
     const diasError = validators.coordenacao.dias(item.dias);
     if (diasError) errors.push(`${prefix} ${diasError}`);
 
-    const subtotalError = validators.coordenacao.subtotal(item.subtotal);
-    if (subtotalError) errors.push(`${prefix} ${subtotalError}`);
+    const prolaboreError = validators.coordenacao.prolabore(item.prolabore);
+    if (prolaboreError) errors.push(`${prefix} ${prolaboreError}`);
   });
 
   return errors;
