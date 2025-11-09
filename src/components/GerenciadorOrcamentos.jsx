@@ -172,6 +172,12 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
         )}
       </div>
     </div>
+    <button
+      onClick={() => import('../utils/debugFirebase').then(m => m.debugFirebase())}
+      className="bg-gray-500 text-white px-3 py-1 rounded text-sm"
+    >
+      🔍 Debug Firebase
+    </button>
   );
 };
 
