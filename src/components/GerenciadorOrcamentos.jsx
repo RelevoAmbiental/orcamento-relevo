@@ -16,33 +16,35 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
 
   const carregarLista = async () => {
     try {
+      console.log('🔄 Iniciando carregamento da lista...');
       const lista = await listarOrcamentos();
+      console.log('✅ Lista carregada:', lista.length, 'itens');
       setOrcamentos(lista);
       
-      // 🔍 DEBUG - REMOVER DEPOIS DE RESOLVER O PROBLEMA
-      console.log('🔍 [DEBUG] DIAGNÓSTICO - Estrutura dos orçamentos:');
-      lista.forEach((orc, index) => {
-        console.log(`--- ORÇAMENTO ${index + 1} (${orc.id}) ---`);
-        console.log('Metadata:', orc.metadata);
-        console.log('Tem coordenacao?:', orc.coordenacao?.length || 0, 'itens');
-        console.log('Tem profissionais?:', orc.profissionais?.length || 0, 'itens');
-        console.log('Estrutura resumida:', {
-          metadata: orc.metadata,
-          coordenacaoCount: orc.coordenacao?.length,
-          profissionaisCount: orc.profissionais?.length,
-          valoresUnicosCount: orc.valoresUnicos?.length,
-          logisticaCount: orc.logistica?.length,
-          parametros: !!orc.parametros
+      // 🔍 DEBUG - VERSÃO MAIS SEGURA
+      if (lista && lista.length > 0) {
+        console.log('🔍 [DEBUG] DIAGNÓSTICO - Estrutura dos orçamentos:');
+        lista.forEach((orc, index) => {
+          console.log(`--- ORÇAMENTO ${index + 1} (${orc.id}) ---`);
+          console.log('📝 Metadata:', orc.metadata);
+          console.log('👥 Coordenacao:', orc.coordenacao?.length || 0, 'itens');
+          console.log('💼 Profissionais:', orc.profissionais?.length || 0, 'itens');
+          console.log('💰 Valores Únicos:', orc.valoresUnicos?.length || 0, 'itens');
+          console.log('🚗 Logística:', orc.logistica?.length || 0, 'itens');
+          console.log('⚙️ Parâmetros:', orc.parametros ? 'SIM' : 'NÃO');
+          
+          // Verificação específica do primeiro item de cada array
+          if (orc.coordenacao && orc.coordenacao.length > 0) {
+            console.log('📊 Primeiro coordenador:', orc.coordenacao[0]);
+          }
         });
-        // Verifica se há dados específicos
-        if (orc.coordenacao && orc.coordenacao.length > 0) {
-          console.log('📊 Primeiro item coordenação:', orc.coordenacao[0]);
-        }
-      });
+      } else {
+        console.log('📭 Nenhum orçamento encontrado para debug');
+      }
       // FIM DEBUG
       
     } catch (error) {
-      console.error('Erro ao carregar lista:', error);
+      console.error('❌ Erro ao carregar lista:', error);
     }
   };
 
