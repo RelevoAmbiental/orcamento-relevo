@@ -46,14 +46,14 @@ const Profissionais = () => {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-relevo-light-gray">
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Cargo</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Prolabore (R$)</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Pessoas</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Dias</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Horas</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Mês</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Total (R$)</th>
+            <tr className="bg-[#E8F5E9]">
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Cargo</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Prolabore (R$)</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Pessoas</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Dias</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Horas</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Mês</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Total (R$)</th>
             </tr>
           </thead>
           <tbody>
@@ -155,9 +155,9 @@ const Profissionais = () => {
             })}
           </tbody>
           <tfoot>
-            <tr className="bg-relevo-light-gray font-semibold font-sans">
-              <td colSpan="6" className="px-4 py-2 text-right">Total Profissionais:</td>
-              <td className="px-4 py-2 text-sm">
+            <tr className="bg-[#2EAD60] font-semibold font-sans">
+              <td colSpan="6" className="px-4 py-2 text-right text-white">Total Profissionais:</td>
+              <td className="px-4 py-2 text-sm text-white">
                  R$ {formatarValorBR(totais?.subtotalProfissionais || 0)}
               </td>
             </tr>
