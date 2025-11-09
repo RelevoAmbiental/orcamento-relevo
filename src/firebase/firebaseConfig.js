@@ -1,8 +1,9 @@
 // src/firebase/firebaseConfig.js
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+// Configuração central do Firebase (usando variáveis de ambiente do Vite)
 
-// --- Configuração do seu projeto Firebase ---
+import { initializeApp } from "firebase/app";
+
+// As chaves são injetadas no ambiente via .env.local ou GitHub Secrets
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -12,8 +13,5 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Inicializa o Firebase
-const app = initializeApp(firebaseConfig);
-
-// Exporta o Firestore
-export const db = getFirestore(app);
+// Inicializa o app Firebase
+export const firebaseApp = initializeApp(firebaseConfig);
