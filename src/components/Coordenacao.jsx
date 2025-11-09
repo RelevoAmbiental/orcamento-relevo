@@ -48,7 +48,7 @@ const Coordenacao = () => {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-relevo-light-gray">
+            <tr className="bg-[#E8F5E9]">
               <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Cargo</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Profissional</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Subtotal (R$)</th>
