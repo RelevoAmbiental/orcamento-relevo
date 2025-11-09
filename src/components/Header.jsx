@@ -159,6 +159,7 @@ const Header = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           <ExportadorOrcamento />
           
+          {/* SALVAR - Ação principal (Verde) */}
           <button
             onClick={handleSave}
             disabled={carregando || !podeSalvar}
@@ -181,6 +182,7 @@ const Header = () => {
             )}
           </button>
           
+          {/* GERENCIAR - Ação terciária (Outlined) */}
           <button
             onClick={() => setMostrarGerenciador(true)}
             className="px-6 py-3 text-[#333C35] bg-white border border-[rgba(0,0,0,0.1)] rounded-md hover:bg-[#F8F9F8] focus:outline-none focus:ring-2 focus:ring-[#2EAD60] focus:ring-offset-2 font-medium transition-all duration-200 shadow-md min-w-[140px] font-sans text-base"
@@ -188,6 +190,7 @@ const Header = () => {
             📋 Gerenciar
           </button>
           
+          {/* NOVO - Ação terciária (Outlined) */}
           <button
             onClick={handleNovoOrcamento}
             className="px-6 py-3 text-[#333C35] bg-white border border-[rgba(0,0,0,0.1)] rounded-md hover:bg-[#F8F9F8] focus:outline-none focus:ring-2 focus:ring-[#2EAD60] focus:ring-offset-2 font-medium transition-all duration-200 shadow-md min-w-[140px] font-sans text-base"
