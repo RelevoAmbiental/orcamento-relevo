@@ -145,8 +145,8 @@ function orcamentoReducer(state, action) {
       return {
         ...action.payload,
         metadata: {
-          ...initialState.metadata,
-          ...action.payload.metadata
+          ...initialState.metadata, // Mantém valores padrão
+          ...action.payload.metadata // Sobrescreve com dados salvos
         }
       };
 
