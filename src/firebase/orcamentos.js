@@ -1,7 +1,8 @@
+// src/firebase/orcamentos.js - VERSÃO COMPLETA CORRIGIDA
 import { db } from './config';
 import { 
   collection, addDoc, updateDoc, deleteDoc, doc, 
-  getDocs, getDoc, query, orderBy, where 
+  getDocs, getDoc, query, orderBy 
 } from 'firebase/firestore';
 
 const orcamentosRef = collection(db, 'orcamentos');
@@ -10,25 +11,29 @@ export const orcamentoService = {
   // Criar novo orçamento
   async criarOrcamento(orcamentoData) {
     try {
-      console.log('Salvando orçamento no Firebase...', orcamentoData);
+      console.log('💾 Iniciando salvamento no Firebase...');
       
-    // 👇 ADICIONE APENAS ESTA LINHA (NÃO altera o salvamento)
-        console.log('🔍 Estrutura completa sendo salva:', JSON.stringify(orcamentoData, null, 2));
-        
-        const docRef = await addDoc(orcamentosRef, {
-          ...orcamentoData,
-          criadoEm: new Date(),
-          atualizadoEm: new Date(),
-          versao: orcamentoData.metadata?.versao || 1
-        });
-        
-        console.log('Orçamento salvo com ID:', docRef.id);
-        return docRef.id;
-      } catch (error) {
-        console.error('Erro ao criar orçamento:', error);
-        throw new Error(`Falha ao salvar orçamento: ${error.message}`);
-      }
-    },
+      // 🔥 LOGS DE MONITORAMENTO - ADICIONADOS AQUI
+      console.log('🔍 Estrutura sendo salva:', {
+        metadata: orcamentoData.metadata,
+        coordenacaoCount: orcamentoData.coordenacao?.length,
+        profissionaisCount: orcamentoData.profissionais?.length
+      });
+      
+      const docRef = await addDoc(orcamentosRef, {
+        ...orcamentoData,
+        criadoEm: new Date(),
+        atualizadoEm: new Date(),
+        versao: orcamentoData.metadata?.versao || 1
+      });
+      
+      console.log('🎯 NOVO ORÇAMENTO SALVO com ID único:', docRef.id);
+      return docRef.id;
+    } catch (error) {
+      console.error('❌ Erro crítico ao criar orçamento:', error);
+      throw new Error(`Falha ao salvar orçamento: ${error.message}`);
+    }
+  },
 
   // Buscar todos os orçamentos
   async listarOrcamentos() {
@@ -45,7 +50,7 @@ export const orcamentoService = {
       
       console.log(`${orcamentos.length} orçamentos encontrados`);
       
-      // 👇 ADICIONE ESTES LOGS PARA DEBUG
+      // 👇 MANTIDO PARA DEBUG (pode remover depois se quiser)
       console.log('📋 IDs dos orçamentos encontrados:');
       orcamentos.forEach(orc => {
         console.log(`- ID: ${orc.id}, Nome: ${orc.metadata?.nome}`);
@@ -67,13 +72,13 @@ export const orcamentoService = {
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        console.log('Orçamento encontrado');
+        console.log('✅ Orçamento encontrado e carregado');
         return {
           id: docSnap.id,
           ...docSnap.data()
         };
       } else {
-        console.log('Orçamento não encontrado');
+        console.log('❌ Orçamento não encontrado');
         return null;
       }
     } catch (error) {
@@ -93,7 +98,7 @@ export const orcamentoService = {
         atualizadoEm: new Date()
       });
       
-      console.log('Orçamento atualizado com sucesso');
+      console.log('✅ Orçamento atualizado com sucesso');
     } catch (error) {
       console.error('Erro ao atualizar orçamento:', error);
       throw new Error(`Falha ao atualizar orçamento: ${error.message}`);
@@ -108,7 +113,7 @@ export const orcamentoService = {
       const docRef = doc(db, 'orcamentos', id);
       await deleteDoc(docRef);
       
-      console.log('Orçamento excluído com sucesso');
+      console.log('✅ Orçamento excluído com sucesso');
     } catch (error) {
       console.error('Erro ao excluir orçamento:', error);
       throw new Error(`Falha ao excluir orçamento: ${error.message}`);
