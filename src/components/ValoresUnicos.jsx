@@ -60,10 +60,10 @@ const ValoresUnicos = () => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-800">Valores Únicos</h2>
+        <h2 className="text-xl font-bold text-relevo-text font-heading">Valores Únicos</h2>
         <button
           onClick={adicionarNovoItem}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm transition-colors"
+          className="bg-relevo-green hover:bg-relevo-green-light text-white font-bold py-2 px-4 rounded text-sm transition-colors font-sans"
         >
           + Adicionar Item
         </button>
@@ -72,12 +72,12 @@ const ValoresUnicos = () => {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-gray-50">
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Item</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Valor Unitário (R$)</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Pessoas</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Dias</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Total (R$)</th>
+            <tr className="bg-relevo-light-gray">
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Item</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Valor Unitário (R$)</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Pessoas</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Dias</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Total (R$)</th>
             </tr>
           </thead>
           <tbody>
@@ -105,7 +105,7 @@ const ValoresUnicos = () => {
                         type="text"
                         value={item.item}
                         onChange={(e) => handleValorUnicoChange(item.id, 'item', e.target.value)}
-                        className={getInputClassName('item', item.item, true)}
+                        className="w-full px-2 py-1 border border-relevo-border rounded text-sm font-sans"
                         placeholder="Descrição do item"
                         title="Descrição do item ou serviço"
                       />
@@ -183,7 +183,7 @@ const ValoresUnicos = () => {
             })}
           </tbody>
           <tfoot>
-            <tr className="bg-gray-100 font-semibold">
+            <tr className="bg-relevo-light-gray font-semibold font-sans">
               <td colSpan="4" className="px-4 py-2 text-right">Total Valores Únicos:</td>
               <td className="px-4 py-2 text-sm">
                 R$ {formatarValorBR(totais?.subtotalValoresUnicos || 0)}
@@ -193,18 +193,6 @@ const ValoresUnicos = () => {
         </table>
       </div>
 
-      {/* LEGENDA DE VALIDAÇÃO */}
-      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
-        <div className="flex items-center mb-1">
-          <span className="w-3 h-3 bg-red-300 rounded mr-2"></span>
-          Campos em vermelho indicam valores que precisam ser ajustados
-        </div>
-        <div className="text-blue-600">
-          • Valor Unitário: Não pode ser negativo<br/>
-          • Pessoas: Quantidade não pode ser negativa<br/>
-          • Dias: Quantidade não pode ser negativa
-        </div>
-      </div>
     </div>
   );
 };

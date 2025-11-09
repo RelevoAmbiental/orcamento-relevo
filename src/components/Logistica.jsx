@@ -1,6 +1,7 @@
 import React from 'react';
 import { useOrcamento } from '../context/OrcamentoContext';
 import { formatarValorBR } from '../utils/formatters';
+import { validators } from '../utils/validators';
 
 const Logistica = () => {
   const { orcamentoAtual, dispatch, totais } = useOrcamento();
@@ -34,13 +35,22 @@ const Logistica = () => {
     });
   };
 
+  const getInputClassName = (field, value) => {
+    const erro = validators.logistica[field]?.(value);
+    const baseClass = "w-full px-2 py-1 border rounded text-sm focus:outline-none focus:ring-1 font-sans";
+    
+    return erro 
+      ? `${baseClass} border-red-300 focus:ring-red-500 bg-red-50` 
+      : `${baseClass} border-relevo-border focus:ring-relevo-green-light`;
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-800">Logística</h2>
+        <h2 className="text-xl font-bold text-relevo-text font-heading">Logística</h2>
         <button
           onClick={adicionarNovoItem}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm"
+          className="bg-relevo-green hover:bg-relevo-green-light text-white font-bold py-2 px-4 rounded text-sm font-sans"
         >
           + Adicionar Item
         </button>
@@ -49,13 +59,13 @@ const Logistica = () => {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-gray-50">
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Item</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Valor (R$)</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Unidade</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Quantidade</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Dias</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Total (R$)</th>
+            <tr className="bg-relevo-light-gray">
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Item</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Valor (R$)</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Unidade</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Quantidade</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Dias</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Total (R$)</th>
             </tr>
           </thead>
           <tbody>
@@ -63,13 +73,13 @@ const Logistica = () => {
               const total = item.valor * item.qtd * item.dias;
               
               return (
-                <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-50">
+                <tr key={item.id} className="border-b border-relevo-border hover:bg-relevo-light-gray">
                   <td className="px-4 py-2 text-sm">
                     <input
                       type="text"
                       value={item.item}
                       onChange={(e) => handleLogisticaChange(item.id, 'item', e.target.value)}
-                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      className="w-full px-2 py-1 border border-relevo-border rounded text-sm font-sans"
                       placeholder="Descrição do item"
                     />
                   </td>
@@ -78,14 +88,14 @@ const Logistica = () => {
                       type="number"
                       value={item.valor}
                       onChange={(e) => handleLogisticaChange(item.id, 'valor', e.target.value)}
-                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      className={getInputClassName('valor', item.valor)}
                     />
                   </td>
                   <td className="px-4 py-2 text-sm">
                     <select
                       value={item.unidade}
                       onChange={(e) => handleLogisticaChange(item.id, 'unidade', e.target.value)}
-                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      className="w-full px-2 py-1 border border-relevo-border rounded text-sm font-sans"
                     >
                       <option value="dia/pessoa">dia/pessoa</option>
                       <option value="dia/veículo">dia/veículo</option>
@@ -103,7 +113,7 @@ const Logistica = () => {
                       type="number"
                       value={item.qtd}
                       onChange={(e) => handleLogisticaChange(item.id, 'qtd', e.target.value)}
-                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      className={getInputClassName('qtd', item.qtd)}
                     />
                   </td>
                   <td className="px-4 py-2 text-sm">
@@ -111,7 +121,7 @@ const Logistica = () => {
                       type="number"
                       value={item.dias}
                       onChange={(e) => handleLogisticaChange(item.id, 'dias', e.target.value)}
-                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      className={getInputClassName('dias', item.dias)}
                     />
                   </td>
                   <td className="px-4 py-2 text-sm font-semibold">R$ {formatarValorBR(total)}</td>
@@ -120,7 +130,7 @@ const Logistica = () => {
             })}
           </tbody>
           <tfoot>
-            <tr className="bg-gray-100 font-semibold">
+            <tr className="bg-relevo-light-gray font-semibold font-sans">
               <td colSpan="5" className="px-4 py-2 text-right">Total Logística:</td>
               <td className="px-4 py-2 text-sm">
                 R$ {formatarValorBR(totais.subtotalLogistica)}

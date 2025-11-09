@@ -33,7 +33,7 @@ const CustosGerais = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 className="text-xl font-bold mb-4 text-gray-800">Custos Gerais e Parâmetros</h2>
+      <h2 className="text-xl font-bold mb-4 text-relevo-text font-heading">Custos Gerais e Parâmetros</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
@@ -49,7 +49,7 @@ const CustosGerais = () => {
           
           return (
             <div key={param.key}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-relevo-text/80 font-sans mb-1">
                 {param.label}
               </label>
               <input
@@ -60,7 +60,7 @@ const CustosGerais = () => {
                 value={valorAtual}
                 onChange={(e) => handleParametroChange(param.key, e.target.value)}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                  erro ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                  erro ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-relevo-green-light'
                 }`}
               />
               {erro && (
@@ -75,43 +75,43 @@ const CustosGerais = () => {
       </div>
 
       {/* Resumo dos Custos - ATUALIZADO */}
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-        <h3 className="font-semibold text-gray-800 mb-2">Resumo dos Custos Indiretos</h3>
+      <div className="mt-6 p-4 bg-relevo-light-gray rounded-lg">
+        <h3 className="font-semibold text-relevo-text font-heading mb-2">Resumo dos Custos Indiretos</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
-            <span className="text-gray-600">Despesas Fiscais:</span>
+            <span className="text-relevo-text/70 font-sans">Despesas Fiscais:</span>
             <div className="font-semibold">
               R$ {formatarValorBR(totais?.despesasFiscais || 0)}
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-relevo-text/60 font-sans">
               {formatarPercentual(orcamentoAtual.parametros.despesasFiscais)}
             </div>
           </div>
           <div>
-            <span className="text-gray-600">Lucro:</span>
+            <span className="text-relevo-text/70 font-sans">Lucro:</span>
             <div className="font-semibold">
               R$ {formatarValorBR(totais?.lucro || 0)}
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-relevo-text/60 font-sans">
               {formatarPercentual(orcamentoAtual.parametros.lucro)}
             </div>
           </div>
           <div>
-            <span className="text-gray-600">Fundo de Giro:</span>
+            <span className="text-relevo-text/70 font-sans">Fundo de Giro:</span>
             <div className="font-semibold">
               R$ {formatarValorBR(totais?.fundoGiro || 0)}
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-relevo-text/60 font-sans">
               {formatarPercentual(orcamentoAtual.parametros.fundoGiro)}
             </div>
           </div>
           <div>
-            <span className="text-gray-600">Impostos:</span>
+            <span className="text-relevo-text/70 font-sans">Impostos:</span>
             <div className="font-semibold">
               R$ {formatarValorBR(totais?.impostos || 0)}
             </div>
-            <div className="text-xs text-gray-500">
-              {formatarPercentual(orcamentoAtual?.parametros?.imposto ?? 0)}
+            <div className="text-xs text-relevo-text/60 font-sans">
+              {formatarPercentual(orcamentoAtual.parametros.imposto)}
             </div>
           </div>
         </div>
@@ -119,26 +119,26 @@ const CustosGerais = () => {
         {/* Outros custos */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mt-4 pt-4 border-t border-gray-200">
           <div>
-            <span className="text-gray-600">Encargos Pessoal:</span>
+            <span className="text-relevo-text/70 font-sans">Encargos Pessoal:</span>
             <div className="font-semibold">
               R$ {formatarValorBR(totais?.encargosPessoal || 0)}
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-relevo-text/60 font-sans">
               {formatarPercentual(orcamentoAtual.parametros.encargosPessoal)}
             </div>
           </div>
           <div>
-            <span className="text-gray-600">Comissão Captação:</span>
+            <span className="text-relevo-text/70 font-sans">Comissão Captação:</span>
             <div className="font-semibold">
               R$ {formatarValorBR(totais?.comissaoCaptacao || 0)}
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-relevo-text/60 font-sans">
               {formatarPercentual(orcamentoAtual.parametros.comissaoCaptacao)}
             </div>
           </div>
           <div>
-            <span className="text-gray-600">Total Custos Indiretos:</span>
-            <div className="font-semibold text-green-600">
+            <span className="text-relevo-text/70 font-sans">Total Custos Indiretos:</span>
+            <div className="font-semibold text-relevo-green font-sans">
               R$ {formatarValorBR(totalCustosIndiretos)}
             </div>
           </div>

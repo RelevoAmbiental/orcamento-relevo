@@ -43,20 +43,20 @@ const Coordenacao = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 className="text-xl font-bold mb-4 text-gray-800">Coordenação</h2>
+      <h2 className="text-xl font-bold mb-4 text-relevo-text font-heading">Coordenação</h2>
       
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-gray-50">
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Cargo</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Profissional</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Subtotal (R$)</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Quant.</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Dias</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Horas</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Mês</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Total (R$)</th>
+            <tr className="bg-relevo-light-gray">
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Cargo</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Profissional</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Subtotal (R$)</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Quant.</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Dias</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Horas</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Mês</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Total (R$)</th>
             </tr>
           </thead>
           <tbody>
@@ -75,7 +75,7 @@ const Coordenacao = () => {
               return (
                 <tr 
                   key={item.id} 
-                  className={`border-b border-gray-200 hover:bg-gray-50 ${
+                  className={`border-b border-gray-200 hover:bg-relevo-light-gray ${
                     temErro ? 'bg-red-50 hover:bg-red-100' : ''
                   }`}
                 >
@@ -163,8 +163,8 @@ const Coordenacao = () => {
                     </div>
                   </td>
                   
-                  <td className="px-4 py-2 text-sm text-gray-600">{horas.toFixed(1).replace('.', ',')}</td>
-                  <td className="px-4 py-2 text-sm text-gray-600">{mes.toFixed(2).replace('.', ',')}</td>
+                  <td className="px-4 py-2 text-sm text-relevo-text/70 font-sans">{horas.toFixed(1).replace('.', ',')}</td>
+                  <td className="px-4 py-2 text-sm text-relevo-text/70 font-sans">{mes.toFixed(2).replace('.', ',')}</td>
                   <td className="px-4 py-2 text-sm font-semibold">R$ {formatarValorBR(total)}</td>
                 </tr>
               );
@@ -181,18 +181,6 @@ const Coordenacao = () => {
         </table>
       </div>
 
-      {/* LEGENDA DE VALIDAÇÃO */}
-      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
-        <div className="flex items-center mb-1">
-          <span className="w-3 h-3 bg-red-300 rounded mr-2"></span>
-          Campos em vermelho indicam valores que precisam ser ajustados
-        </div>
-        <div className="text-blue-600">
-          • Subtotal: Valor não pode ser negativo<br/>
-          • Quantidade: Não pode ser negativa<br/>
-          • Dias: Quantidade não pode ser negativa
-        </div>
-      </div>
     </div>
   );
 };

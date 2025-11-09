@@ -1,7 +1,7 @@
+// src/App.jsx - VERSÃO CORRIGIDA
 import React from 'react';
 import { OrcamentoProvider } from './context/OrcamentoContext';
 import Header from './components/Header';
-import IdentificacaoOrcamento from './components/IdentificacaoOrcamento';
 import CustosGerais from './components/CustosGerais';
 import Coordenacao from './components/Coordenacao';
 import Profissionais from './components/Profissionais';
@@ -14,8 +14,9 @@ function App() {
     <OrcamentoProvider>
       <div className="min-h-screen bg-gray-100">
         <Header />
-        <div className="container mx-auto px-4 py-6 space-y-6">
-          <IdentificacaoOrcamento />
+        
+        <div className="container mx-auto px-4 py-6">
+          {/* REMOVI O GerenciarOrcamentos DAQUI - AGORA ESTÁ NO HEADER */}
           <CustosGerais />
           <Coordenacao />
           <Profissionais />

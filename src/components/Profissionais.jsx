@@ -41,19 +41,19 @@ const Profissionais = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 className="text-xl font-bold mb-4 text-gray-800">Profissionais</h2>
+      <h2 className="text-xl font-bold text-relevo-text font-heading">Profissionais</h2>
       
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-gray-50">
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Cargo</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Prolabore (R$)</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Pessoas</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Dias</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Horas</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Mês</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Total (R$)</th>
+            <tr className="bg-relevo-light-gray">
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Cargo</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Prolabore (R$)</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Pessoas</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Dias</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Horas</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Mês</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-relevo-text/80 font-sans">Total (R$)</th>
             </tr>
           </thead>
           <tbody>
@@ -155,7 +155,7 @@ const Profissionais = () => {
             })}
           </tbody>
           <tfoot>
-            <tr className="bg-gray-100 font-semibold">
+            <tr className="bg-relevo-light-gray font-semibold font-sans">
               <td colSpan="6" className="px-4 py-2 text-right">Total Profissionais:</td>
               <td className="px-4 py-2 text-sm">
                  R$ {formatarValorBR(totais?.subtotalProfissionais || 0)}
@@ -165,18 +165,6 @@ const Profissionais = () => {
         </table>
       </div>
 
-      {/* LEGENDA DE VALIDAÇÃO */}
-      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
-        <div className="flex items-center mb-1">
-          <span className="w-3 h-3 bg-red-300 rounded mr-2"></span>
-          Campos em vermelho indicam valores que precisam ser ajustados
-        </div>
-        <div className="text-blue-600">
-          • Prolabore: Valor não pode ser negativo<br/>
-          • Pessoas: Quantidade não pode ser negativa<br/>
-          • Dias: Quantidade não pode ser negativa
-        </div>
-      </div>
     </div>
   );
 };

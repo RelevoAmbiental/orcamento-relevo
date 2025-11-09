@@ -69,10 +69,10 @@ const GerenciadorOrcamentos = () => {
   return (
     <div className="bg-white rounded-lg">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Gerenciar Orçamentos</h2>
+        <h2 className="text-2xl font-bold text-relevo-text font-heading">Gerenciar Orçamentos</h2>
         <button
           onClick={carregarLista}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+          className="bg-relevo-green text-white px-4 py-2 rounded-lg hover:bg-relevo-green-light transition font-sans"
         >
           Atualizar Lista
         </button>
@@ -87,7 +87,7 @@ const GerenciadorOrcamentos = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white">
           <thead>
-            <tr className="bg-gray-100">
+            <tr className="bg-relevo-light-gray">
               <th className="py-3 px-4 text-left">Nome</th>
               <th className="py-3 px-4 text-left">Cliente</th>
               <th className="py-3 px-4 text-left">Data</th>
@@ -110,13 +110,13 @@ const GerenciadorOrcamentos = () => {
                   <div className="flex justify-center space-x-2">
                     <button
                       onClick={() => handleCarregar(orcamento.id)}
-                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition text-sm"
+                      className="bg-relevo-blue text-white px-3 py-1 rounded hover:bg-relevo-blue/90 transition text-sm font-sans"
                     >
                       Carregar
                     </button>
                     <button
                       onClick={() => handleExcluir(orcamento.id, orcamento.metadata?.nome)}
-                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition text-sm"
+                      className="bg-relevo-orange text-white px-3 py-1 rounded hover:bg-relevo-orange/90 transition text-sm font-sans"
                     >
                       Excluir
                     </button>
@@ -128,7 +128,7 @@ const GerenciadorOrcamentos = () => {
         </table>
 
         {orcamentos.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-relevo-text/60 font-sans">
             Nenhum orçamento salvo encontrado.
           </div>
         )}

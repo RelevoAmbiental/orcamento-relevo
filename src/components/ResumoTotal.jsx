@@ -1,61 +1,101 @@
 import React from 'react';
 import { useOrcamento } from '../context/OrcamentoContext';
-
-const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+import { formatarValorBR } from '../utils/formatters';
 
 const ResumoTotal = () => {
-  const { orcamentoAtual, updateMetadata, totais } = useOrcamento();
-  const desconto = Number(orcamentoAtual?.metadata?.descontoPercentual || 0);
+  const { totais } = useOrcamento();
 
   return (
-    <section className="bg-white rounded-xl p-4 shadow mt-6">
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800">Resumo do Orçamento</h2>
-          <p className="text-sm text-gray-500">Visão geral dos valores consolidados</p>
+    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 className="text-xl font-bold mb-4 text-relevo-text font-heading">Resumo Total do Orçamento</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Subtotais */}
+        <div className="space-y-3">
+          <h3 className="font-semibold text-relevo-text/80 font-heading">Subtotais por Categoria</h3>
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-relevo-text/70 font-sans">Coordenação:</span>
+            <span className="font-medium">R$ {formatarValorBR(totais.subtotalCoordenacao)}</span>
+          </div>
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-relevo-text/70 font-sans">Profissionais:</span>
+            <span className="font-medium">R$ {formatarValorBR(totais.subtotalProfissionais)}</span>
+          </div>
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-relevo-text/70 font-sans">Valores Únicos:</span>
+            <span className="font-medium">R$ {formatarValorBR(totais.subtotalValoresUnicos)}</span>
+          </div>
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-relevo-text/70 font-sans">Logística:</span>
+            <span className="font-medium">R$ {formatarValorBR(totais.subtotalLogistica)}</span>
+          </div>
+          <div className="flex justify-between border-b-2 border-gray-300 pb-2 font-semibold">
+            <span className="text-relevo-text font-heading">Subtotal Geral:</span>
+            <span className="text-relevo-blue font-sans">R$ {formatarValorBR(totais.subtotalGeral)}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div>
-            <label className="block text-xs text-gray-600 mb-1">Desconto (%)</label>
-            <input
-              type="number"
-              min="0"
-              max="100"
-              step="0.1"
-              value={desconto}
-              onChange={(e) => updateMetadata({ descontoPercentual: e.target.value })}
-              className="w-32 border rounded-lg px-3 py-2 text-right focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
+
+        {/* Custos Indiretos e Total */}
+        <div className="space-y-3">
+          <h3 className="font-semibold text-relevo-text/80 font-heading">Custos Indiretos e Total</h3>
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-relevo-text/70 font-sans">Despesas Fiscais:</span>
+            <span className="font-medium">R$ {formatarValorBR(totais.despesasFiscais)}</span>
+          </div>
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-relevo-text/70 font-sans">Lucro:</span>
+            <span className="font-medium">R$ {formatarValorBR(totais.lucro)}</span>
+          </div>
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-relevo-text/70 font-sans">Fundo de Giro:</span>
+            <span className="font-medium">R$ {formatarValorBR(totais.fundoGiro)}</span>
+          </div>
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-relevo-text/70 font-sans">Encargos Pessoal:</span>
+            <span className="font-medium">R$ {formatarValorBR(totais.encargosPessoal)}</span>
+          </div>
+          <div className="flex justify-between border-b pb-2">
+            <span className="text-relevo-text/70 font-sans">Impostos:</span>
+            <span className="font-medium">R$ {formatarValorBR(totais.impostos)}</span>
+          </div>
+          <div className="flex justify-between border-b-2 border-gray-300 pb-2 font-semibold text-lg">
+            <span className="text-relevo-text font-heading">TOTAL GERAL:</span>
+            <span className="text-relevo-green font-sans">R$ {formatarValorBR(totais.totalGeral)}</span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-        <div className="border rounded-lg p-3">
-          <div className="text-xs text-gray-500">Custos Operacionais</div>
-          <div className="text-lg font-semibold">{currency.format(totais?.custosOperacionais || 0)}</div>
-        </div>
-        <div className="border rounded-lg p-3">
-          <div className="text-xs text-gray-500">Honorários Técnicos</div>
-          <div className="text-lg font-semibold">{currency.format(totais?.honorarios || 0)}</div>
-        </div>
-        <div className="border rounded-lg p-3">
-          <div className="text-xs text-gray-500">BDI</div>
-          <div className="text-lg font-semibold">{currency.format(totais?.bdi || 0)}</div>
-        </div>
-        <div className="border rounded-lg p-3 bg-gray-50">
-          <div className="text-xs text-gray-500">Total</div>
-          <div className="text-lg font-semibold">{currency.format(totais?.total || 0)}</div>
+      {/* Margens */}
+      <div className="mt-6 p-4 bg-relevo-light-gray rounded-lg">
+        <h3 className="font-semibold text-relevo-blue font-heading mb-2">Análise de Margens</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="text-center">
+            <div className="text-relevo-blue font-sans font-semibold">
+              {((totais.lucro / totais.totalGeral) * 100).toFixed(1).replace('.', ',')}%
+            </div>
+            <div className="text-relevo-blue/80 font-sans text-xs">Margem de Lucro</div>
+          </div>
+          <div className="text-center">
+            <div className="text-relevo-blue font-sans font-semibold">
+              {((totais.impostos / totais.totalGeral) * 100).toFixed(1).replace('.', ',')}%
+            </div>
+            <div className="text-relevo-blue/80 font-sans text-xs">Impostos</div>
+          </div>
+          <div className="text-center">
+            <div className="text-relevo-blue font-sans font-semibold">
+              {((totais.subtotalGeral / totais.totalGeral) * 100).toFixed(1).replace('.', ',')}%
+            </div>
+            <div className="text-relevo-blue/80 font-sans text-xs">Custos Diretos</div>
+          </div>
+          <div className="text-center">
+            <div className="text-relevo-blue font-sans font-semibold">
+              {100 - ((totais.subtotalGeral / totais.totalGeral) * 100).toFixed(1).replace('.', ',')}%
+            </div>
+            <div className="text-relevo-blue/80 font-sans text-xs">Custos Indiretos</div>
+          </div>
         </div>
       </div>
-
-      <div className="mt-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200">
-        <div className="text-sm text-emerald-800">Total com desconto</div>
-        <div className="text-2xl font-bold text-emerald-900">
-          {currency.format(totais?.totalComDesconto || 0)}
-        </div>
-      </div>
-    </section>
+    </div>
   );
 };
 
