@@ -75,77 +75,77 @@ const CustosGerais = () => {
       </div>
 
       {/* Resumo dos Custos - CORRIGIDO */}
-      <div className="mt-6 p-4 bg-relevo-light-gray rounded-lg">
-        <h3 className="font-semibold text-relevo-text font-heading mb-4">Resumo dos Custos Indiretos</h3>
+      <div className="mt-6 p-4 bg-[#E8F5E9] rounded-lg border border-[#C8E6C9]">
+        <h3 className="font-semibold text-[#2E3E31] font-heading mb-4">Resumo dos Custos Indiretos</h3>
         
         {/* Primeira linha - 4 itens */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
           <div className="text-center">
-            <span className="text-relevo-text/70 font-sans block">Despesas Fiscais:</span>
-            <div className="font-semibold text-relevo-text">
+            <span className="text-[#2E3E31]/80 font-sans block">Despesas Fiscais:</span>
+            <div className="font-semibold text-[#2E3E31]">
               R$ {formatarValorBR(totais?.despesasFiscais || 0)}
             </div>
-            <div className="text-xs text-relevo-text/60 font-sans">
+            <div className="text-xs text-[#2E3E31]/60 font-sans">
               {formatarPercentual(orcamentoAtual.parametros.despesasFiscais)}
             </div>
           </div>
           
           <div className="text-center">
-            <span className="text-relevo-text/70 font-sans block">Lucro:</span>
-            <div className="font-semibold text-relevo-text">
+            <span className="text-[#2E3E31]/80 font-sans block">Lucro:</span>
+            <div className="font-semibold text-[#2E3E31]">
               R$ {formatarValorBR(totais?.lucro || 0)}
             </div>
-            <div className="text-xs text-relevo-text/60 font-sans">
+            <div className="text-xs text-[#2E3E31]/60 font-sans">
               {formatarPercentual(orcamentoAtual.parametros.lucro)}
             </div>
           </div>
           
           <div className="text-center">
-            <span className="text-relevo-text/70 font-sans block">Fundo de Giro:</span>
-            <div className="font-semibold text-relevo-text">
+            <span className="text-[#2E3E31]/80 font-sans block">Fundo de Giro:</span>
+            <div className="font-semibold text-[#2E3E31]">
               R$ {formatarValorBR(totais?.fundoGiro || 0)}
             </div>
-            <div className="text-xs text-relevo-text/60 font-sans">
+            <div className="text-xs text-[#2E3E31]/60 font-sans">
               {formatarPercentual(orcamentoAtual.parametros.fundoGiro)}
             </div>
           </div>
           
           <div className="text-center">
-            <span className="text-relevo-text/70 font-sans block">Impostos:</span>
-            <div className="font-semibold text-relevo-text">
+            <span className="text-[#2E3E31]/80 font-sans block">Impostos:</span>
+            <div className="font-semibold text-[#2E3E31]">
               R$ {formatarValorBR(totais?.impostos || 0)}
             </div>
-            <div className="text-xs text-relevo-text/60 font-sans">
+            <div className="text-xs text-[#2E3E31]/60 font-sans">
               {formatarPercentual(orcamentoAtual.parametros.imposto)}
             </div>
           </div>
         </div>
         
         {/* Segunda linha - 3 itens centralizados */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm border-t border-gray-200 pt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm border-t border-[#C8E6C9] pt-4">
           <div className="text-center">
-            <span className="text-relevo-text/70 font-sans block">Encargos Pessoal:</span>
-            <div className="font-semibold text-relevo-text">
+            <span className="text-[#2E3E31]/80 font-sans block">Encargos Pessoal:</span>
+            <div className="font-semibold text-[#2E3E31]">
               R$ {formatarValorBR(totais?.encargosPessoal || 0)}
             </div>
-            <div className="text-xs text-relevo-text/60 font-sans">
+            <div className="text-xs text-[#2E3E31]/60 font-sans">
               {formatarPercentual(orcamentoAtual.parametros.encargosPessoal)}
             </div>
           </div>
           
           <div className="text-center">
-            <span className="text-relevo-text/70 font-sans block">Comissão Captação:</span>
-            <div className="font-semibold text-relevo-text">
+            <span className="text-[#2E3E31]/80 font-sans block">Comissão Captação:</span>
+            <div className="font-semibold text-[#2E3E31]">
               R$ {formatarValorBR(totais?.comissaoCaptacao || 0)}
             </div>
-            <div className="text-xs text-relevo-text/60 font-sans">
+            <div className="text-xs text-[#2E3E31]/60 font-sans">
               {formatarPercentual(orcamentoAtual.parametros.comissaoCaptacao)}
             </div>
           </div>
           
           <div className="text-center">
-            <span className="text-relevo-text/70 font-sans block">Total Custos Indiretos:</span>
-            <div className="font-semibold text-relevo-green font-sans">
+            <span className="text-[#2E3E31]/80 font-sans block">Total Custos Indiretos:</span>
+            <div className="font-semibold text-[#2EAD60] font-sans">
               R$ {formatarValorBR(totalCustosIndiretos)}
             </div>
           </div>
