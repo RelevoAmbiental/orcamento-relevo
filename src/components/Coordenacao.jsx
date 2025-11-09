@@ -51,7 +51,7 @@ const Coordenacao = () => {
             <tr className="bg-[#E8F5E9]">
               <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Cargo</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Profissional</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Subtotal (R$)</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Prolabore (R$)</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Quant.</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Dias</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-[#2E3E31] font-sans">Horas</th>
@@ -111,7 +111,7 @@ const Coordenacao = () => {
                         min="0"
                         step="100"
                         value={item.subtotal}
-                        onChange={(e) => handleCoordenacaoChange(item.id, 'subtotal', e.target.value)}
+                        onChange={(e) => handleCoordenacaoChange(item.id, 'prolabore', e.target.value)}
                         className={getInputClassName('subtotal', item.subtotal)}
                         title={erroSubtotal || "Valor mensal do coordenador"}
                       />
