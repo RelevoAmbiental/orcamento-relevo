@@ -48,23 +48,56 @@ const GerenciadorOrcamentos = () => {
   };
 
   const calcularTotal = (orcamento) => {
-    // Replica o cálculo do ResumoTotal
-    const subtotalCoordenacao = orcamento.coordenacao?.reduce((acc, item) => acc + (item.total || 0), 0) || 0;
-    const subtotalProfissionais = orcamento.profissionais?.reduce((acc, item) => acc + (item.total || 0), 0) || 0;
-    const subtotalValoresUnicos = orcamento.valoresUnicos?.reduce((acc, item) => acc + (item.valor || 0), 0) || 0;
-    const subtotalLogistica = orcamento.logistica?.reduce((acc, item) => acc + (item.valor || 0), 0) || 0;
-    
-    const subtotal = subtotalCoordenacao + subtotalProfissionais + subtotalValoresUnicos + subtotalLogistica;
-    return subtotal;
+    // Cálculo correto replicando a lógica do contexto
+    const subtotalCoordenacao = orcamento.coordenacao?.reduce((total, item) => {
+      const meses = item.dias / 30;
+      return total + (meses * item.subtotal * item.quant);
+    }, 0) || 0;
+  
+    const subtotalProfissionais = orcamento.profissionais?.reduce((total, item) => {
+      const meses = item.dias / 30;
+      return total + (meses * item.prolabore * item.pessoas);
+    }, 0) || 0;
+  
+    const subtotalValoresUnicos = orcamento.valoresUnicos?.reduce((total, item) => {
+      return total + (item.valor * item.pessoas * item.dias);
+    }, 0) || 0;
+  
+    const subtotalLogistica = orcamento.logistica?.reduce((total, item) => {
+      return total + (item.valor * item.qtd * item.dias);
+    }, 0) || 0;
+  
+    const subtotalGeral = subtotalCoordenacao + subtotalProfissionais + subtotalValoresUnicos + subtotalLogistica;
+  
+    const baseFolhaPagamento = subtotalCoordenacao + subtotalProfissionais;
+    const encargosPessoal = baseFolhaPagamento * (orcamento.parametros?.encargosPessoal || 0);
+  
+    const custoTotal = subtotalGeral + encargosPessoal;
+  
+    const lucro = custoTotal * (orcamento.parametros?.lucro || 0);
+    const fundoGiro = custoTotal * (orcamento.parametros?.fundoGiro || 0);
+  
+    const subtotalComLucroFundo = custoTotal + lucro + fundoGiro;
+  
+    const impostos = subtotalComLucroFundo * (orcamento.parametros?.imposto || 0);
+  
+    const despesasFiscais = custoTotal * (orcamento.parametros?.despesasFiscais || 0);
+    const comissaoCaptacao = custoTotal * (orcamento.parametros?.comissaoCaptacao || 0);
+  
+    const totalAntesDesconto = subtotalComLucroFundo + impostos + despesasFiscais + comissaoCaptacao;
+  
+    const desconto = totalAntesDesconto * ((orcamento.metadata?.desconto || 0) / 100);
+    const totalGeral = totalAntesDesconto - desconto;
+  
+    return totalGeral;
   };
-
-  if (carregando) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-      </div>
-    );
-  }
+    if (carregando) {
+      return (
+        <div className="flex justify-center items-center p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+        </div>
+      );
+    }
 
   return (
     <div className="bg-white rounded-lg">
