@@ -243,38 +243,38 @@ const Header = () => {
         </div>
       </div>
 
-      {/* SEÇÃO INFORMAÇÕES DO ORÇAMENTO - LAYOUT OTIMIZADO */}
-      <div className="bg-[#2EAD60] rounded-lg p-6 mb-6">
+      {/* SEÇÃO INFORMAÇÕES DO ORÇAMENTO - UMA LINHA SÓ COM TAMANHOS REDUZIDOS */}
+      <div className="bg-[#2EAD60] rounded-lg p-4 mb-6">
         <div className="w-full">
-          <h3 className="text-lg font-semibold text-white mb-6 text-center font-heading">
+          <h3 className="text-lg font-semibold text-white mb-4 text-center font-heading">
             Informações do Orçamento
           </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            {/* Nome do Orçamento - 35% */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+            {/* Nome do Orçamento - 40% */}
             <div className="lg:col-span-5">
-              <label className="block text-sm font-medium mb-2 text-white font-sans">
+              <label className="block text-sm font-medium mb-1 text-white font-sans">
                 Nome do Orçamento *
               </label>
               <input
                 type="text"
                 value={orcamentoAtual.metadata.nome}
                 onChange={(e) => handleMetadataChange('nome', e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CC373] transition-colors text-sm font-sans text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CC373] transition-colors text-sm font-sans text-gray-900 placeholder-gray-500"
                 placeholder="Ex: Projeto EIA-RIMA Serra Azul"
               />
               <p className="text-xs text-white/80 mt-1">Mínimo 3 caracteres</p>
             </div>
             
-            {/* Cliente - 35% */}
-            <div className="lg:col-span-5">
-              <label className="block text-sm font-medium mb-2 text-white font-sans">
+            {/* Cliente - 30% */}
+            <div className="lg:col-span-4">
+              <label className="block text-sm font-medium mb-1 text-white font-sans">
                 Cliente *
               </label>
               <input
                 type="text"
                 value={orcamentoAtual.metadata.cliente}
                 onChange={(e) => handleMetadataChange('cliente', e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CC373] transition-colors text-sm font-sans text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CC373] transition-colors text-sm font-sans text-gray-900 placeholder-gray-500"
                 placeholder="Nome da empresa cliente"
               />
               <p className="text-xs text-white/80 mt-1">Obrigatório</p>
@@ -282,21 +282,21 @@ const Header = () => {
             
             {/* Data - 15% */}
             <div className="lg:col-span-2">
-              <label className="block text-sm font-medium mb-2 text-white font-sans">
+              <label className="block text-sm font-medium mb-1 text-white font-sans">
                 Data *
               </label>
               <input
                 type="date"
                 value={orcamentoAtual.metadata.data}
                 onChange={(e) => handleMetadataChange('data', e.target.value)}
-                className="w-full px-3 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CC373] transition-colors text-sm font-sans text-gray-900"
+                className="w-full px-2 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CC373] transition-colors text-sm font-sans text-gray-900"
               />
               <p className="text-xs text-white/80 mt-1">Obrigatório</p>
             </div>
       
             {/* Desconto - 15% */}
-            <div className="lg:col-span-2">
-              <label className="block text-sm font-medium mb-2 text-white font-sans">
+            <div className="lg:col-span-1">
+              <label className="block text-sm font-medium mb-1 text-white font-sans">
                 Desconto (%)
               </label>
               <input
@@ -305,7 +305,7 @@ const Header = () => {
                 max="100"
                 value={orcamentoAtual.metadata.desconto}
                 onChange={(e) => handleMetadataChange('desconto', e.target.value)}
-                className="w-full px-3 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CC373] transition-colors text-sm font-sans text-gray-900 placeholder-gray-500"
+                className="w-full px-2 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3CC373] transition-colors text-sm font-sans text-gray-900 placeholder-gray-500"
                 placeholder="0"
               />
               <p className="text-xs text-white/80 mt-1">0 a 100</p>
