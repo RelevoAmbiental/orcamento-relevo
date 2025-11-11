@@ -1,4 +1,4 @@
-name: Build Orçamento para Portal
+name: Build e Deploy Automático para Portal
 
 on:
   push:
@@ -6,11 +6,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
-    - name: 📥 Checkout código
+    - name: 📥 Checkout código do orçamento
       uses: actions/checkout@v4
 
     - name: ⚙️ Setup Node.js
@@ -32,14 +32,28 @@ jobs:
         VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
         VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
 
-    - name: 📦 Criar artifact compactado
-      run: |
-        cd dist
-        zip -r ../orcamento-build.zip ./*
-        
-    - name: 📤 Upload artifact
-      uses: actions/upload-artifact@v4
+    - name: 📥 Checkout código do portal
+      uses: actions/checkout@v4
       with:
-        name: orcamento-build
-        path: orcamento-build.zip
-        retention-days: 7
+        token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+        repository: RelevoAmbiental/portal-relevo
+        path: portal-temp
+
+    - name: 📁 Copiar arquivos buildados para o portal
+      run: |
+        echo "🔄 Copiando arquivos do build para o portal..."
+        rm -rf portal-temp/orcamento/
+        mkdir -p portal-temp/orcamento
+        cp -r dist/* portal-temp/orcamento/
+        echo "✅ Arquivos copiados!"
+        echo "📂 Conteúdo da pasta orcamento:"
+        ls -la portal-temp/orcamento/
+
+    - name: 💾 Commit e Push para o portal
+      run: |
+        cd portal-temp
+        git config --local user.email "actions@github.com"
+        git config --local user.name "GitHub Actions"
+        git add orcamento/
+        git diff --staged --quiet || git commit -m "🚀 Deploy automático do Sistema de Orçamentos"
+        git push
