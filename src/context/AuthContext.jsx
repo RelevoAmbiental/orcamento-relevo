@@ -62,7 +62,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    console.log('🔄 AuthContext: Iniciando monitoramento de autenticação...');
+  console.log('🔄 AuthContext: Iniciando monitoramento de autenticação...');
+  console.log('🔍 URL atual completa:', window.location.href);
+  
+  // Debug detalhado dos parâmetros da URL
+  const urlParams = new URLSearchParams(window.location.search);
+  console.log('🔍 Parâmetros da URL:', Object.fromEntries(urlParams.entries()));
+  console.log('🔍 authToken parameter:', urlParams.get('authToken') ? `SIM (${urlParams.get('authToken').length} chars)` : 'NÃO');
     
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       console.log('🔥 AuthStateChanged:', user ? `Logado: ${user.email}` : 'Deslogado');
