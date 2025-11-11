@@ -1,10 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { 
-  onAuthStateChanged, 
-  signOut, 
-  setPersistence, 
-  browserLocalPersistence 
-} from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 
 const AuthContext = createContext();
@@ -20,32 +15,22 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('🔄 AuthContext: Iniciando com persistência...');
+    console.log('🔄 AuthContext: Monitorando autenticação...');
     
-    // ✅ CONFIGURAR PERSISTÊNCIA DO FIREBASE AUTH
-    setPersistence(auth, browserLocalPersistence)
-      .then(() => {
-        console.log('✅ Persistência configurada com sucesso');
-        
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-          console.log('🔥 AuthStateChanged:', user ? `Logado: ${user.email}` : 'Deslogado');
-          
-          if (user) {
-            console.log('✅ Usuário autenticado detectado via Firebase Auth');
-            setUser(user);
-          } else {
-            console.log('🔒 Nenhum usuário autenticado');
-            setUser(null);
-          }
-          setLoading(false);
-        });
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log('🔥 AuthStateChanged:', user ? `Logado: ${user.email}` : 'Deslogado');
+      
+      if (user) {
+        console.log('✅ Usuário autenticado detectado');
+        setUser(user);
+      } else {
+        console.log('🔒 Nenhum usuário autenticado');
+        setUser(null);
+      }
+      setLoading(false);
+    });
 
-        return unsubscribe;
-      })
-      .catch((error) => {
-        console.error('❌ Erro na persistência do Firebase:', error);
-        setLoading(false);
-      });
+    return unsubscribe;
   }, []);
 
   const logout = async () => {
