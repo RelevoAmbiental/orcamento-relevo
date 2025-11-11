@@ -1,4 +1,4 @@
-// src/context/OrcamentoContext.jsx - VERSÃO COMPLETA CORRIGIDA
+// src/context/OrcamentoContext.jsx - VERSÃO CORRIGIDA
 import React, { createContext, useContext, useReducer, useState } from 'react';
 import { orcamentoService } from '../firebase/orcamentos';
 import { 
@@ -64,7 +64,7 @@ const initialState = {
     { id: 3, item: 'Lavanderia', valor: 150, unidade: 'dia/pessoa', qtd: 0, dias: 1 },
     { id: 4, item: 'Exame médico', valor: 50, unidade: 'pessoa', qtd: 0, dias: 1 },
     { id: 5, item: 'Seguro de Vida', valor: 50, unidade: 'pessoa', qtd: 0, dias: 1 },
-    { id: 6, item: 'Combustível', valor: 8, unidade: 'dia/veículo', qtd: 0, dias: 1 }, // CORRIGIDO: litro → unidade
+    { id: 6, item: 'Combustível', valor: 8, unidade: 'dia/veículo', qtd: 0, dias: 1 },
     { id: 7, item: 'Manutenção veículo', valor: 100, unidade: 'mês/veículo', qtd: 0, dias: 1 },
     { id: 8, item: 'Veículo', valor: 500, unidade: 'dia', qtd: 0, dias: 1 },
     { id: 9, item: 'Pedagios', valor: 50, unidade: 'dia/veículo', qtd: 0, dias: 1 },
@@ -149,8 +149,8 @@ function orcamentoReducer(state, action) {
       return {
         ...action.payload,
         metadata: {
-          ...initialState.metadata, // Mantém valores padrão
-          ...action.payload.metadata // Sobrescreve com dados salvos
+          ...initialState.metadata,
+          ...action.payload.metadata
         }
       };
 
@@ -306,8 +306,8 @@ export const OrcamentoProvider = ({ children }) => {
     
     // CALCULAR CUSTOS E MARGENS
     const custosIndiretos = orcamentoData.custosIndiretos || 0;
-    const margemLucroPercentual = orcamentoData.margemLucro || 0.3; // 30%
-    const taxaAdministrativaPercentual = orcamentoData.taxaAdministrativa || 0.1; // 10%
+    const margemLucroPercentual = orcamentoData.margemLucro || 0.3;
+    const taxaAdministrativaPercentual = orcamentoData.taxaAdministrativa || 0.1;
     
     const margemLucro = totalServicos * margemLucroPercentual;
     const taxaAdministrativa = totalServicos * taxaAdministrativaPercentual;
@@ -315,92 +315,70 @@ export const OrcamentoProvider = ({ children }) => {
     const valorTotal = totalServicos + custosIndiretos + margemLucro + taxaAdministrativa;
     
     return {
-      // TOTAIS POR CATEGORIA
       totalCoordenacao,
       totalProfissionais, 
       totalValoresUnicos,
       totalLogistica,
       totalServicos,
-      
-      // CUSTOS E TAXAS
       custosIndiretos,
       margemLucroPercentual,
       margemLucro,
       taxaAdministrativaPercentual, 
       taxaAdministrativa,
-      
-      // TOTAIS FINAIS
       valorTotal,
-      
-      // METADADOS DE CÁLCULO
       calculadoEm: new Date().toISOString(),
       versaoCalculo: '1.0'
     };
   };
-  
-  // AÇÕES COM FIREBASE REAL - ATUALIZADA COM VALIDAÇÃO
-  const salvarOrcamento = async (orcamentoData = state) => {
-    // ... o resto do seu código atualizado
-  };
 
-  
- // AÇÕES COM FIREBASE REAL - ATUALIZADA COM VALIDAÇÃO
-    const salvarOrcamento = async (orcamentoData = state) => {
-      // Validar antes de salvar
-      const validacao = validarOrcamentoAtual();
-      
-      if (!validacao.valido) {
-        setErro('Não é possível salvar o orçamento. Corrija os erros de validação primeiro.');
-        throw new Error('Validação falhou');
-      }
+  // ✅ APENAS UMA FUNÇÃO salvarOrcamento (REMOVA A OUTRA)
+  const salvarOrcamento = async (orcamentoData = state) => {
+    const validacao = validarOrcamentoAtual();
     
-      setCarregando(true);
-      setErro(null);
+    if (!validacao.valido) {
+      setErro('Não é possível salvar o orçamento. Corrija os erros de validação primeiro.');
+      throw new Error('Validação falhou');
+    }
+
+    setCarregando(true);
+    setErro(null);
+    
+    try {
+      const idUnico = orcamentoData.id || `orc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const resumoCompleto = calcularResumoCompleto(orcamentoData);
       
-      try {
-        // ✅ CORREÇÃO 1: GARANTIR ID ÚNICO (sem duplicatas)
-        const idUnico = orcamentoData.id || `orc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
-        // ✅ CORREÇÃO 2: CALCULAR E INCLUIR RESUMO COMPLETO
-        const resumoCompleto = calcularResumoCompleto(orcamentoData);
-        
-        // 🔥 MANTENHA SUA ESTRUTURA ATUAL + ADICIONE AS CORREÇÕES
-        const dadosParaSalvar = JSON.parse(JSON.stringify({
-          ...orcamentoData,
-          id: idUnico, // ✅ USA O NOVO ID ÚNICO
-          resumo: resumoCompleto, // ✅ INCLUI O RESUMO COMPLETO
-          
-          // MANTENHA SEUS ARRAYS ORIGINAIS:
-          coordenacao: orcamentoData.coordenacao?.map(item => ({ ...item })) || [],
-          profissionais: orcamentoData.profissionais?.map(item => ({ ...item })) || [],
-          valoresUnicos: orcamentoData.valoresUnicos?.map(item => ({ ...item })) || [],
-          logistica: orcamentoData.logistica?.map(item => ({ ...item })) || [],
-          
-          // ✅ METADADOS ATUALIZADOS
-          metadata: {
-            ...orcamentoData.metadata,
-            criadoEm: orcamentoData.metadata?.criadoEm || new Date().toISOString(),
-            atualizadoEm: new Date().toISOString(),
-            criadoPor: user?.uid,
-            versao: '2.0'
-          }
-        }));
-        
-        console.log('💾 Salvando orçamento com ID único:', idUnico);
-        console.log('📊 RESUMO incluído:', resumoCompleto);
-        
-        const id = await orcamentoService.criarOrcamento(dadosParaSalvar);
-        
-        console.log('✅ Orçamento salvo com ID único:', id);
-        setCarregando(false);
-        return id;
-      } catch (error) {
-        console.error('❌ Erro ao salvar orçamento:', error);
-        setErro(error.message);
-        setCarregando(false);
-        throw error;
-      }
-    };
+      const dadosParaSalvar = JSON.parse(JSON.stringify({
+        ...orcamentoData,
+        id: idUnico,
+        resumo: resumoCompleto,
+        coordenacao: orcamentoData.coordenacao?.map(item => ({ ...item })) || [],
+        profissionais: orcamentoData.profissionais?.map(item => ({ ...item })) || [],
+        valoresUnicos: orcamentoData.valoresUnicos?.map(item => ({ ...item })) || [],
+        logistica: orcamentoData.logistica?.map(item => ({ ...item })) || [],
+        metadata: {
+          ...orcamentoData.metadata,
+          criadoEm: orcamentoData.metadata?.criadoEm || new Date().toISOString(),
+          atualizadoEm: new Date().toISOString(),
+          criadoPor: user?.uid,
+          versao: '2.0'
+        }
+      }));
+      
+      console.log('💾 Salvando orçamento com ID único:', idUnico);
+      console.log('📊 RESUMO incluído:', resumoCompleto);
+      
+      const id = await orcamentoService.criarOrcamento(dadosParaSalvar);
+      
+      console.log('✅ Orçamento salvo com ID único:', id);
+      setCarregando(false);
+      return id;
+    } catch (error) {
+      console.error('❌ Erro ao salvar orçamento:', error);
+      setErro(error.message);
+      setCarregando(false);
+      throw error;
+    }
+  };
 
   const carregarOrcamento = async (id) => {
     setCarregando(true);
@@ -471,8 +449,6 @@ export const OrcamentoProvider = ({ children }) => {
     
     try {
       const todosOrcamentos = await orcamentoService.listarOrcamentos();
-      
-      // ✅ FILTRAR APENAS OS ORÇAMENTOS DO USUÁRIO ATUAL
       const orcamentosDoUsuario = todosOrcamentos.filter(orc => 
         orc.metadata?.criadoPor === user?.uid
       );
@@ -491,31 +467,21 @@ export const OrcamentoProvider = ({ children }) => {
 
   const limparErro = () => setErro(null);
 
-  // VALOR DO CONTEXT ATUALIZADO COM VALIDAÇÕES
   const value = {
-    // Estado (compatível)
     orcamentoAtual: state,
     dispatch,
-    
-    // Novos estados
     carregando,
     erro,
     errosValidacao,
     totais: calcularTotais(state),
-    
-    // Ações Firebase
     salvarOrcamento,
     carregarOrcamento,
-    listarOrcamentos, // ✅ AGORA ESTÁ DISPONÍVEL
+    listarOrcamentos,
     atualizarOrcamento,
     excluirOrcamento,
-    
-    // ⭐⭐ NOVAS AÇÕES DE VALIDAÇÃO ⭐⭐
     validarCampo,
     validarOrcamentoAtual,
     limparErrosValidacao,
-    
-    // Utilitários
     limparErro
   };
 
