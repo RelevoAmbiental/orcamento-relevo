@@ -7,7 +7,7 @@ export default defineConfig({
     allowedHosts: ['5173-iet5z0jheqmlp9n6seny2-62b4a251.manus.computer'],
   },
   plugins: [react()],
-  base: '/orcamento/', // ✅ MUDOU para subpasta do portal
+  base: '/orcamento/', // ✅ SUBPASTA DO PORTAL
   build: {
     outDir: 'dist',
     sourcemap: false
