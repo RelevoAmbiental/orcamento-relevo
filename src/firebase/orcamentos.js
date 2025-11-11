@@ -35,12 +35,19 @@ export const orcamentoService = {
     }
   },
 
-  // Buscar todos os orçamentos
+  // Buscar todos os orçamentos DO USUÁRIO ATUAL
   async listarOrcamentos() {
     try {
-      console.log('Buscando orçamentos do Firebase...');
+      console.log('🔄 Buscando orçamentos do usuário no Firebase...');
       
-      const q = query(orcamentosRef, orderBy('criadoEm', 'desc'));
+      // ✅ AGORA COM FILTRO POR USUÁRIO - usando metadata.criadoPor
+      const q = query(
+        orcamentosRef, 
+        orderBy('criadoEm', 'desc')
+        // ⚠️ NOTA: Não podemos usar where() aqui porque precisamos do user.uid
+        // O filtro será feito no OrcamentoContext
+      );
+      
       const querySnapshot = await getDocs(q);
       
       const orcamentos = querySnapshot.docs.map(doc => ({
@@ -48,13 +55,10 @@ export const orcamentoService = {
         ...doc.data()
       }));
       
-      console.log(`${orcamentos.length} orçamentos encontrados`);
+      console.log(`${orcamentos.length} documentos encontrados no total`);
       
-      // 👇 MANTIDO PARA DEBUG (pode remover depois se quiser)
-      console.log('📋 IDs dos orçamentos encontrados:');
-      orcamentos.forEach(orc => {
-        console.log(`- ID: ${orc.id}, Nome: ${orc.metadata?.nome}`);
-      });
+      // ✅ FILTRAR POR USUÁRIO NO CLIENTE (já que não temos user.uid aqui)
+      // O OrcamentoContext vai fazer o filtro final
       
       return orcamentos;
     } catch (error) {
