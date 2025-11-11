@@ -1,18 +1,34 @@
-// src/components/LoginRedirect.jsx - VERSÃO SIMPLIFICADA
-import React from 'react';
+// src/components/LoginRedirect.jsx - VERSÃO COM DEBUG DE URL
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const LoginRedirect = () => {
   const { user, loading } = useAuth();
+  const [urlInfo, setUrlInfo] = useState('');
+
+  useEffect(() => {
+    // Verificar parâmetros da URL quando componente montar
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('authToken');
+    
+    console.log('🔍 LoginRedirect - URL atual:', window.location.href);
+    console.log('🔍 LoginRedirect - Token na URL:', token ? `SIM (${token.length} chars)` : 'NÃO');
+    
+    if (token) {
+      setUrlInfo(`Token detectado na URL (${token.length} caracteres)`);
+    } else {
+      setUrlInfo('Nenhum token encontrado na URL');
+    }
+  }, []);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-relevo-background flex items-center justify-center p-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2EAD60] mx-auto mb-4"></div>
-          <p className="text-relevo-text font-sans">Verificando autenticação...</p>
+          <p className="text-relevo-text font-sans">Processando autenticação...</p>
           <p className="text-sm text-relevo-text/70 mt-2 font-sans">
-            Conectando com o Portal Relevo
+            {urlInfo || 'Verificando credenciais...'}
           </p>
         </div>
       </div>
@@ -25,7 +41,7 @@ const LoginRedirect = () => {
         <div className="bg-white rounded-lg shadow-xl p-8 max-w-md text-center">
           <div className="text-6xl mb-4">✅</div>
           <h2 className="text-xl font-bold text-relevo-green mb-4 font-heading">
-            Autenticação Confirmada!
+            Autenticação Bem-sucedida!
           </h2>
           <p className="text-relevo-text mb-4 font-sans">
             Logado como: <strong>{user.email}</strong>
@@ -70,6 +86,14 @@ const LoginRedirect = () => {
           </ol>
         </div>
 
+        {urlInfo && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4">
+            <p className="text-sm text-yellow-800 font-sans">
+              <strong>🔍 Debug Info:</strong> {urlInfo}
+            </p>
+          </div>
+        )}
+
         <div className="space-y-3">
           <button
             onClick={() => window.open('https://portal.relevo.eco.br', '_blank')}
@@ -79,15 +103,15 @@ const LoginRedirect = () => {
           </button>
           
           <button
-            onClick={() => window.location.reload()}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+            onClick={() => {
+              const urlParams = new URLSearchParams(window.location.search);
+              const token = urlParams.get('authToken');
+              alert(`URL: ${window.location.href}\nToken: ${token ? `Presente (${token.length} chars)` : 'Ausente'}`);
+            }}
+            className="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm"
           >
-            🔄 Já fiz login, verificar novamente
+            🔍 Verificar URL Atual
           </button>
-        </div>
-
-        <div className="mt-6 p-3 bg-gray-100 rounded text-xs text-gray-600">
-          <strong>💡 Dica:</strong> Use a mesma aba do portal para acesso instantâneo
         </div>
       </div>
     </div>
