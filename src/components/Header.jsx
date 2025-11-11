@@ -1,5 +1,7 @@
+// src/components/Header.jsx - ARQUIVO ATUALIZADO
 import React, { useState, useEffect } from 'react';
 import { useOrcamento } from '../context/OrcamentoContext';
+import { useAuth } from '../context/AuthContext'; // ⬅️ NOVA IMPORTAÇÃO
 import GerenciadorOrcamentos from './GerenciadorOrcamentos';
 import ExportadorOrcamento from './ExportadorOrcamento';
 
@@ -56,6 +58,9 @@ const Header = () => {
     limparErrosValidacao
   } = useOrcamento();
 
+  // ⬅️ NOVO: usar autenticação
+  const { user, logout } = useAuth();
+
   const [mostrarGerenciador, setMostrarGerenciador] = useState(false);
   const [errosVisiveis, setErrosVisiveis] = useState(true);
 
@@ -72,6 +77,18 @@ const Header = () => {
       type: 'UPDATE_METADATA',
       payload: { [field]: value }
     });
+  };
+
+  // ⬅️ NOVO: função de logout
+  const handleLogout = async () => {
+    if (confirm('Deseja sair do sistema? Isso irá desconectar você do Portal Relevo.')) {
+      try {
+        await logout();
+      } catch (error) {
+        console.error('Erro ao fazer logout:', error);
+        alert('Erro ao sair do sistema');
+      }
+    }
   };
 
   const handleSave = async () => {
@@ -153,13 +170,19 @@ const Header = () => {
             <p className="font-medium text-relevo-blue font-heading">
               Sistema de Orçamentos
             </p>
+            {/* ⬅️ NOVO: mostrar usuário logado */}
+            {user && (
+              <p className="text-sm text-relevo-text/70 font-sans mt-1">
+                Logado como: <strong>{user.email}</strong>
+              </p>
+            )}
           </div>
         </div>
         
         <div className="flex flex-col sm:flex-row gap-3">
           <ExportadorOrcamento />
           
-          {/* SALVAR - Ação principal (Verde) */}
+          {/* SALVAR */}
           <button
             onClick={handleSave}
             disabled={carregando || !podeSalvar}
@@ -182,7 +205,7 @@ const Header = () => {
             )}
           </button>
           
-          {/* GERENCIAR - Ação terciária (Outlined) */}
+          {/* GERENCIAR */}
           <button
             onClick={() => setMostrarGerenciador(true)}
             className="px-6 py-3 text-[#333C35] bg-white border border-[rgba(0,0,0,0.1)] rounded-md hover:bg-[#F8F9F8] focus:outline-none focus:ring-2 focus:ring-[#2EAD60] focus:ring-offset-2 font-medium transition-all duration-200 shadow-md min-w-[140px] font-sans text-base"
@@ -190,12 +213,21 @@ const Header = () => {
             📋 Gerenciar
           </button>
           
-          {/* NOVO - Ação terciária (Outlined) */}
+          {/* NOVO */}
           <button
             onClick={handleNovoOrcamento}
             className="px-6 py-3 text-[#333C35] bg-white border border-[rgba(0,0,0,0.1)] rounded-md hover:bg-[#F8F9F8] focus:outline-none focus:ring-2 focus:ring-[#2EAD60] focus:ring-offset-2 font-medium transition-all duration-200 shadow-md min-w-[140px] font-sans text-base"
           >
             🆕 Novo
+          </button>
+
+          {/* ⬅️ NOVO: BOTÃO DE LOGOUT */}
+          <button
+            onClick={handleLogout}
+            className="px-4 py-3 text-red-600 bg-white border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 font-medium transition-colors font-sans text-sm"
+            title={`Sair do sistema (${user?.email})`}
+          >
+            🚪 Sair
           </button>
         </div>
       </div>
@@ -243,14 +275,13 @@ const Header = () => {
         </div>
       </div>
 
-      {/* SEÇÃO INFORMAÇÕES DO ORÇAMENTO - UMA LINHA SÓ COM TAMANHOS REDUZIDOS */}
+      {/* SEÇÃO INFORMAÇÕES DO ORÇAMENTO */}
       <div className="bg-[#2EAD60] rounded-lg p-4 mb-6">
         <div className="w-full">
           <h3 className="text-lg font-semibold text-white mb-4 text-center font-heading">
             Informações do Orçamento
           </h3>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
-            {/* Nome do Orçamento - 40% */}
             <div className="lg:col-span-5">
               <label className="block text-sm font-medium mb-1 text-white font-sans">
                 Nome do Orçamento *
@@ -265,7 +296,6 @@ const Header = () => {
               <p className="text-xs text-white/80 mt-1">Mínimo 3 caracteres</p>
             </div>
             
-            {/* Cliente - 30% */}
             <div className="lg:col-span-4">
               <label className="block text-sm font-medium mb-1 text-white font-sans">
                 Cliente *
@@ -280,7 +310,6 @@ const Header = () => {
               <p className="text-xs text-white/80 mt-1">Obrigatório</p>
             </div>
             
-            {/* Data - 15% */}
             <div className="lg:col-span-2">
               <label className="block text-sm font-medium mb-1 text-white font-sans">
                 Data *
@@ -294,7 +323,6 @@ const Header = () => {
               <p className="text-xs text-white/80 mt-1">Obrigatório</p>
             </div>
       
-            {/* Desconto - 15% */}
             <div className="lg:col-span-1">
               <label className="block text-sm font-medium mb-1 text-white font-sans">
                 Desconto (%)
