@@ -465,15 +465,23 @@ export const OrcamentoProvider = ({ children }) => {
     }
   };
 
-  // 🔥 FUNÇÃO ADICIONADA - ESTAVA FALTANDO
   const listarOrcamentos = async () => {
     setCarregando(true);
     setErro(null);
     
     try {
-      const orcamentos = await orcamentoService.listarOrcamentos();
+      const todosOrcamentos = await orcamentoService.listarOrcamentos();
+      
+      // ✅ FILTRAR APENAS OS ORÇAMENTOS DO USUÁRIO ATUAL
+      const orcamentosDoUsuario = todosOrcamentos.filter(orc => 
+        orc.metadata?.criadoPor === user?.uid
+      );
+      
+      console.log(`📊 ${orcamentosDoUsuario.length} orçamentos do usuário ${user?.email}`);
+      console.log('📋 IDs únicos dos orçamentos:', orcamentosDoUsuario.map(o => o.id));
+      
       setCarregando(false);
-      return orcamentos;
+      return orcamentosDoUsuario;
     } catch (error) {
       setErro(error.message);
       setCarregando(false);
