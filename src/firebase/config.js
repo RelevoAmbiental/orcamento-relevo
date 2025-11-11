@@ -1,9 +1,9 @@
-// src/firebase/config.js - VERSÃO UNIFICADA COM PORTAL
-import { initializeApp } from 'firebase/app';
+// src/firebase/config.js
+import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// 🔥 MESMO PROJETO DO PORTAL - CREDENCIAIS IDÊNTICAS
+// 🔧 Projeto unificado: portal-relevo
 const firebaseConfig = {
   apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
   authDomain: "portal-relevo.firebaseapp.com",
@@ -14,11 +14,10 @@ const firebaseConfig = {
   measurementId: "G-W8TTP3D3YQ"
 };
 
-// Inicializar Firebase
-const app = initializeApp(firebaseConfig);
+// ✅ Evita re-inicialização em hot-reload/dev
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
-// Exportar serviços
+// 🔐 Serviços exportados para a aplicação
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-
-console.log('✅ Firebase configurado com projeto do Portal');
+export default app;
