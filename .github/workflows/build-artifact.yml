@@ -35,7 +35,7 @@ jobs:
     - name: 📥 Checkout código do portal
       uses: actions/checkout@v4
       with:
-        token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.PAT_TOKEN }}
         repository: RelevoAmbiental/portal-relevo
         path: portal-temp
 
@@ -55,5 +55,5 @@ jobs:
         git config --local user.email "actions@github.com"
         git config --local user.name "GitHub Actions"
         git add orcamento/
-        git diff --staged --quiet || git commit -m "🚀 Deploy automático do Sistema de Orçamentos"
+        git commit -m "🚀 Deploy automático do Sistema de Orçamentos" || echo "⚠️ Nenhuma mudança para commitar"
         git push
