@@ -1,4 +1,4 @@
-// src/context/AuthContext.jsx - VERSÃO COM localStorage
+// src/context/AuthContext.jsx - VERSÃO COM URL PARAMETERS
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut, signInWithCustomToken } from 'firebase/auth';
 import { auth } from '../firebase/config';
@@ -16,54 +16,48 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [processingToken, setProcessingToken] = useState(false);
 
-  // Verificar se há sessão compartilhada do portal
-  const verificarSessaoPortal = async () => {
+  // Função para processar token da URL
+  const processarTokenDaURL = async () => {
     try {
-      const portalToken = localStorage.getItem('portal-auth-token');
-      const portalUser = localStorage.getItem('portal-auth-user');
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('authToken');
       
-      console.log('🔍 Verificando sessão do portal...', {
-        token: portalToken ? `SIM (${portalToken.length} chars)` : 'NÃO',
-        user: portalUser ? 'SIM' : 'NÃO'
-      });
-
-      if (portalToken && portalUser) {
-        const userData = JSON.parse(portalUser);
+      console.log('🔍 Verificando token na URL...', token ? `Token encontrado (${token.length} chars)` : 'Nenhum token');
+      
+      if (token && !processingToken) {
+        console.log('🎫 Token encontrado na URL, processando...');
+        setProcessingToken(true);
         
-        // Verificar se o token não expirou (menos de 10 minutos)
-        const isTokenFresh = Date.now() - userData.timestamp < 10 * 60 * 1000;
-        
-        if (isTokenFresh) {
-          console.log('🎫 Token do portal encontrado e válido, fazendo login...');
+        try {
+          // Fazer login com o token customizado
+          console.log('🔄 Iniciando signInWithCustomToken...');
+          const userCredential = await signInWithCustomToken(auth, token);
+          console.log('✅ Login com token bem-sucedido:', userCredential.user.email);
           
-          try {
-            // Fazer login com o token do portal
-            const userCredential = await signInWithCustomToken(auth, portalToken);
-            console.log('✅ Login automático com token do portal:', userCredential.user.email);
-            
-            // Limpar dados do localStorage após uso bem-sucedido
-            localStorage.removeItem('portal-auth-token');
-            localStorage.removeItem('portal-auth-user');
-            
-            return userCredential.user;
-          } catch (error) {
-            console.error('❌ Erro ao fazer login com token do portal:', error);
-            // Limpar dados inválidos
-            localStorage.removeItem('portal-auth-token');
-            localStorage.removeItem('portal-auth-user');
-          }
-        } else {
-          console.log('⏰ Token do portal expirado, limpando...');
-          localStorage.removeItem('portal-auth-token');
-          localStorage.removeItem('portal-auth-user');
+          // Remover token da URL para segurança
+          window.history.replaceState({}, '', window.location.pathname);
+          
+          setUser(userCredential.user);
+          setProcessingToken(false);
+          return true;
+          
+        } catch (error) {
+          console.error('❌ Erro ao fazer login com token:', error);
+          console.error('🔧 Detalhes do erro:', error.code, error.message);
+          
+          // Remover token inválido da URL
+          window.history.replaceState({}, '', window.location.pathname);
+          setProcessingToken(false);
+          return false;
         }
       }
-      
-      return null;
+      return false;
     } catch (error) {
-      console.error('❌ Erro ao verificar sessão do portal:', error);
-      return null;
+      console.error('❌ Erro ao processar token da URL:', error);
+      setProcessingToken(false);
+      return false;
     }
   };
 
@@ -71,30 +65,28 @@ export const AuthProvider = ({ children }) => {
     console.log('🔄 AuthContext: Iniciando monitoramento de autenticação...');
     
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log('🔥 AuthStateChanged:', user ? `Logado: ${user.email}` : 'Deslogado');
+      
       if (user) {
-        // Usuário já está autenticado no Firebase
-        console.log('🔥 AuthStateChanged: Logado:', user.email);
+        // Usuário já está autenticado
         setUser(user);
         setLoading(false);
+        setProcessingToken(false);
       } else {
-        // Não há usuário autenticado, verificar sessão do portal
-        console.log('🔥 AuthStateChanged: Deslogado, verificando sessão do portal...');
+        // Não há usuário autenticado, verificar token na URL
+        console.log('🔍 Nenhum usuário logado, verificando token na URL...');
+        const tokenProcessado = await processarTokenDaURL();
         
-        const portalUser = await verificarSessaoPortal();
-        
-        if (portalUser) {
-          // Login automático bem-sucedido
-          setUser(portalUser);
-        } else {
-          // Nenhuma sessão disponível
+        if (!tokenProcessado) {
+          console.log('❌ Nenhum token válido encontrado na URL');
           setUser(null);
+          setLoading(false);
         }
-        
-        setLoading(false);
       }
     }, (error) => {
       console.error('❌ Erro no AuthStateChanged:', error);
       setLoading(false);
+      setProcessingToken(false);
     });
 
     return unsubscribe;
@@ -102,10 +94,6 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      // Limpar sessão do portal também
-      localStorage.removeItem('portal-auth-token');
-      localStorage.removeItem('portal-auth-user');
-      
       await signOut(auth);
       console.log('👋 Logout realizado com sucesso');
     } catch (error) {
@@ -116,7 +104,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
-    loading,
+    loading: loading || processingToken,
     logout
   };
 
