@@ -1,4 +1,4 @@
-// src/context/AuthContext.jsx - ARQUIVO NOVO
+// src/context/AuthContext.jsx - VERSÃO COM DEBUG
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
@@ -18,34 +18,23 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('🔄 AuthContext: Iniciando verificação de autenticação...');
+    
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('🔥 Status de autenticação:', user ? `Logado como ${user.email}` : 'Não logado');
+      console.log('🔥 AuthStateChanged chamado:', user);
+      console.log('📧 Email do usuário:', user?.email);
+      console.log('🔑 UID do usuário:', user?.uid);
+      console.log('✅ Token disponível:', user ? 'SIM' : 'NÃO');
+      
       setUser(user);
+      setLoading(false);
+    }, (error) => {
+      console.error('❌ Erro no onAuthStateChanged:', error);
       setLoading(false);
     });
 
     return unsubscribe;
   }, []);
 
-  const logout = async () => {
-    try {
-      await signOut(auth);
-      console.log('✅ Logout realizado com sucesso');
-    } catch (error) {
-      console.error('❌ Erro no logout:', error);
-      throw error;
-    }
-  };
-
-  const value = {
-    user,
-    logout,
-    loading
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  // ... resto do código igual
 };
