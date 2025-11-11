@@ -287,43 +287,120 @@ export const OrcamentoProvider = ({ children }) => {
     setErrosValidacao([]);
   };
 
+  // ✅ FUNÇÃO PARA CALCULAR RESUMO COMPLETO (CRÍTICO PARA PDF/CSV)
+  const calcularResumoCompleto = (orcamentoData) => {
+    // CALCULAR TOTAIS DOS SERVIÇOS
+    const totalCoordenacao = orcamentoData.coordenacao?.reduce((sum, item) => 
+      sum + (item.valorTotal || 0), 0) || 0;
+    
+    const totalProfissionais = orcamentoData.profissionais?.reduce((sum, item) => 
+      sum + (item.valorTotal || 0), 0) || 0;
+    
+    const totalValoresUnicos = orcamentoData.valoresUnicos?.reduce((sum, item) => 
+      sum + (item.valorTotal || 0), 0) || 0;
+    
+    const totalLogistica = orcamentoData.logistica?.reduce((sum, item) => 
+      sum + (item.valorTotal || 0), 0) || 0;
+    
+    const totalServicos = totalCoordenacao + totalProfissionais + totalValoresUnicos + totalLogistica;
+    
+    // CALCULAR CUSTOS E MARGENS
+    const custosIndiretos = orcamentoData.custosIndiretos || 0;
+    const margemLucroPercentual = orcamentoData.margemLucro || 0.3; // 30%
+    const taxaAdministrativaPercentual = orcamentoData.taxaAdministrativa || 0.1; // 10%
+    
+    const margemLucro = totalServicos * margemLucroPercentual;
+    const taxaAdministrativa = totalServicos * taxaAdministrativaPercentual;
+    
+    const valorTotal = totalServicos + custosIndiretos + margemLucro + taxaAdministrativa;
+    
+    return {
+      // TOTAIS POR CATEGORIA
+      totalCoordenacao,
+      totalProfissionais, 
+      totalValoresUnicos,
+      totalLogistica,
+      totalServicos,
+      
+      // CUSTOS E TAXAS
+      custosIndiretos,
+      margemLucroPercentual,
+      margemLucro,
+      taxaAdministrativaPercentual, 
+      taxaAdministrativa,
+      
+      // TOTAIS FINAIS
+      valorTotal,
+      
+      // METADADOS DE CÁLCULO
+      calculadoEm: new Date().toISOString(),
+      versaoCalculo: '1.0'
+    };
+  };
+  
   // AÇÕES COM FIREBASE REAL - ATUALIZADA COM VALIDAÇÃO
   const salvarOrcamento = async (orcamentoData = state) => {
-    // Validar antes de salvar
-    const validacao = validarOrcamentoAtual();
-    
-    if (!validacao.valido) {
-      setErro('Não é possível salvar o orçamento. Corrija os erros de validação primeiro.');
-      throw new Error('Validação falhou');
-    }
-  
-    setCarregando(true);
-    setErro(null);
-    
-    try {
-      // 🔥 PREVENÇÃO: Converter para objeto simples e garantir estrutura correta
-      const dadosParaSalvar = JSON.parse(JSON.stringify({
-        ...orcamentoData,
-        // Garantir que não há IDs duplicados nos arrays
-        coordenacao: orcamentoData.coordenacao?.map(item => ({ ...item })) || [],
-        profissionais: orcamentoData.profissionais?.map(item => ({ ...item })) || [],
-        valoresUnicos: orcamentoData.valoresUnicos?.map(item => ({ ...item })) || [],
-        logistica: orcamentoData.logistica?.map(item => ({ ...item })) || []
-      }));
-      
-      console.log('💾 Salvando orçamento com estrutura limpa...');
-      const id = await orcamentoService.criarOrcamento(dadosParaSalvar);
-      
-      console.log('✅ Orçamento salvo com ID único:', id);
-      setCarregando(false);
-      return id;
-    } catch (error) {
-      console.error('❌ Erro ao salvar orçamento:', error);
-      setErro(error.message);
-      setCarregando(false);
-      throw error;
-    }
+    // ... o resto do seu código atualizado
   };
+
+  
+ // AÇÕES COM FIREBASE REAL - ATUALIZADA COM VALIDAÇÃO
+    const salvarOrcamento = async (orcamentoData = state) => {
+      // Validar antes de salvar
+      const validacao = validarOrcamentoAtual();
+      
+      if (!validacao.valido) {
+        setErro('Não é possível salvar o orçamento. Corrija os erros de validação primeiro.');
+        throw new Error('Validação falhou');
+      }
+    
+      setCarregando(true);
+      setErro(null);
+      
+      try {
+        // ✅ CORREÇÃO 1: GARANTIR ID ÚNICO (sem duplicatas)
+        const idUnico = orcamentoData.id || `orc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        // ✅ CORREÇÃO 2: CALCULAR E INCLUIR RESUMO COMPLETO
+        const resumoCompleto = calcularResumoCompleto(orcamentoData);
+        
+        // 🔥 MANTENHA SUA ESTRUTURA ATUAL + ADICIONE AS CORREÇÕES
+        const dadosParaSalvar = JSON.parse(JSON.stringify({
+          ...orcamentoData,
+          id: idUnico, // ✅ USA O NOVO ID ÚNICO
+          resumo: resumoCompleto, // ✅ INCLUI O RESUMO COMPLETO
+          
+          // MANTENHA SEUS ARRAYS ORIGINAIS:
+          coordenacao: orcamentoData.coordenacao?.map(item => ({ ...item })) || [],
+          profissionais: orcamentoData.profissionais?.map(item => ({ ...item })) || [],
+          valoresUnicos: orcamentoData.valoresUnicos?.map(item => ({ ...item })) || [],
+          logistica: orcamentoData.logistica?.map(item => ({ ...item })) || [],
+          
+          // ✅ METADADOS ATUALIZADOS
+          metadata: {
+            ...orcamentoData.metadata,
+            criadoEm: orcamentoData.metadata?.criadoEm || new Date().toISOString(),
+            atualizadoEm: new Date().toISOString(),
+            criadoPor: user?.uid,
+            versao: '2.0'
+          }
+        }));
+        
+        console.log('💾 Salvando orçamento com ID único:', idUnico);
+        console.log('📊 RESUMO incluído:', resumoCompleto);
+        
+        const id = await orcamentoService.criarOrcamento(dadosParaSalvar);
+        
+        console.log('✅ Orçamento salvo com ID único:', id);
+        setCarregando(false);
+        return id;
+      } catch (error) {
+        console.error('❌ Erro ao salvar orçamento:', error);
+        setErro(error.message);
+        setCarregando(false);
+        throw error;
+      }
+    };
 
   const carregarOrcamento = async (id) => {
     setCarregando(true);
