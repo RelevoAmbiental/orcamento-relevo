@@ -12,6 +12,7 @@ import {
   validarLogistica 
 } from '../utils/validators';
 
+const user = window.relevoUser || firebase.auth().currentUser;
 const OrcamentoContext = createContext();
 
 // Estado inicial completo - CORRIGIDO
