@@ -1,31 +1,50 @@
-// src/App.jsx - VERSÃO CORRIGIDA
+// src/App.jsx - ARQUIVO ATUALIZADO
 import React from 'react';
 import { OrcamentoProvider } from './context/OrcamentoContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Header from './components/Header';
 import CustosGerais from './components/CustosGerais';
 import Coordenacao from './components/Coordenacao';
 import Profissionais from './components/Profissionais';
 import ValoresUnicos from './components/ValoresUnicos';
 import Logistica from './components/Logistica';
-import ResumoTotal from './components/ResumoTotal';
+import LoginRedirect from './components/LoginRedirect';
+import LoadingScreen from './components/LoadingScreen';
 
-function App() {
+// Componente que verifica autenticação
+const ProtectedApp = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  if (!user) {
+    return <LoginRedirect />;
+  }
+
   return (
     <OrcamentoProvider>
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-relevo-background">
         <Header />
-        
-        <div className="container mx-auto px-4 py-6">
-          {/* REMOVI O GerenciarOrcamentos DAQUI - AGORA ESTÁ NO HEADER */}
+        <main className="container mx-auto px-4 py-6">
           <CustosGerais />
           <Coordenacao />
           <Profissionais />
           <ValoresUnicos />
           <Logistica />
-          <ResumoTotal />
-        </div>
+        </main>
       </div>
     </OrcamentoProvider>
+  );
+};
+
+// App principal
+function App() {
+  return (
+    <AuthProvider>
+      <ProtectedApp />
+    </AuthProvider>
   );
 }
 
