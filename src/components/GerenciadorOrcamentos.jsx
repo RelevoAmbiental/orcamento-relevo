@@ -1,5 +1,5 @@
-// src/components/GerenciadorOrcamentos.jsx - VERSÃO COMPLETA COM DEBUG
-import React, { useState, useEffect } from 'react';
+// src/components/GerenciadorOrcamentos.jsx - VERSÃO COMPLETA COM DEBUG (corrigida)
+import React, { useState, useEffect, useMemo } from 'react';
 import { useOrcamento } from '../context/OrcamentoContext';
 import { formatarValorBR } from '../utils/formatters';
 
@@ -13,22 +13,20 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
   } = useOrcamento();
   
   const [orcamentos, setOrcamentos] = useState([]);
+  const [busca, setBusca] = useState(""); // filtro simples no cliente
 
   const carregarLista = async () => {
     try {
       const lista = await listarOrcamentos();
-      
-      // PREVENÇÃO: Remover duplicados por ID (mantemos esta proteção)
+
+      // Remover duplicados por ID
       const listaUnica = lista.reduce((acc, current) => {
         const x = acc.find(item => item.id === current.id);
-        if (!x) {
-          return acc.concat([current]);
-        }
+        if (!x) acc.push(current);
         return acc;
       }, []);
-      
+
       setOrcamentos(listaUnica);
-      
     } catch (error) {
       console.error('Erro ao carregar lista:', error);
     }
@@ -58,50 +56,66 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
     }
   };
 
-  const calcularTotal = (orcamento) => {
-    // Cálculo correto replicando a lógica do contexto
-    const subtotalCoordenacao = orcamento.coordenacao?.reduce((total, item) => {
-      const meses = item.dias / 30;
-      return total + (meses * item.subtotal * item.quant);
-    }, 0) || 0;
+  // Regras de cálculo local — fallback para documentos antigos
+  const calcularTotalLocal = (orcamento) => {
+    const n = (v) => (isNaN(v) || v === null || v === undefined ? 0 : Number(v));
 
-    const subtotalProfissionais = orcamento.profissionais?.reduce((total, item) => {
-      const meses = item.dias / 30;
-      return total + (meses * item.prolabore * item.pessoas);
-    }, 0) || 0;
+    const subtotalCoordenacao = (orcamento.coordenacao || []).reduce((total, item) => {
+      const meses = n(item.dias) / 30;
+      return total + (meses * n(item.subtotal) * n(item.quant));
+    }, 0);
 
-    const subtotalValoresUnicos = orcamento.valoresUnicos?.reduce((total, item) => {
-      return total + (item.valor * item.pessoas * item.dias);
-    }, 0) || 0;
+    const subtotalProfissionais = (orcamento.profissionais || []).reduce((total, item) => {
+      const meses = n(item.dias) / 30;
+      return total + (meses * n(item.prolabore) * n(item.pessoas));
+    }, 0);
 
-    const subtotalLogistica = orcamento.logistica?.reduce((total, item) => {
-      return total + (item.valor * item.qtd * item.dias);
-    }, 0) || 0;
+    const subtotalValoresUnicos = (orcamento.valoresUnicos || []).reduce((total, item) => {
+      return total + (n(item.valor) * n(item.pessoas) * n(item.dias));
+    }, 0);
+
+    const subtotalLogistica = (orcamento.logistica || []).reduce((total, item) => {
+      return total + (n(item.valor) * n(item.qtd) * n(item.dias));
+    }, 0);
 
     const subtotalGeral = subtotalCoordenacao + subtotalProfissionais + subtotalValoresUnicos + subtotalLogistica;
+    const p = orcamento.parametros || {};
 
-    const baseFolhaPagamento = subtotalCoordenacao + subtotalProfissionais;
-    const encargosPessoal = baseFolhaPagamento * (orcamento.parametros?.encargosPessoal || 0);
-
-    const custoTotal = subtotalGeral + encargosPessoal;
-
-    const lucro = custoTotal * (orcamento.parametros?.lucro || 0);
-    const fundoGiro = custoTotal * (orcamento.parametros?.fundoGiro || 0);
-
+    const encargosPessoal   = (subtotalCoordenacao + subtotalProfissionais) * n(p.encargosPessoal);
+    const custoTotal        = subtotalGeral + encargosPessoal;
+    const lucro             = custoTotal * n(p.lucro);
+    const fundoGiro         = custoTotal * n(p.fundoGiro);
     const subtotalComLucroFundo = custoTotal + lucro + fundoGiro;
 
-    const impostos = subtotalComLucroFundo * (orcamento.parametros?.imposto || 0);
-
-    const despesasFiscais = custoTotal * (orcamento.parametros?.despesasFiscais || 0);
-    const comissaoCaptacao = custoTotal * (orcamento.parametros?.comissaoCaptacao || 0);
+    const impostos          = subtotalComLucroFundo * n(p.imposto);
+    const despesasFiscais   = custoTotal * n(p.despesasFiscais);
+    const comissaoCaptacao  = custoTotal * n(p.comissaoCaptacao);
 
     const totalAntesDesconto = subtotalComLucroFundo + impostos + despesasFiscais + comissaoCaptacao;
 
-    const desconto = totalAntesDesconto * ((orcamento.metadata?.desconto || 0) / 100);
-    const totalGeral = totalAntesDesconto - desconto;
+    const descontoPercent = n(orcamento?.metadata?.desconto) / 100;
+    const desconto        = totalAntesDesconto * descontoPercent;
 
-    return totalGeral;
+    return totalAntesDesconto - desconto;
   };
+
+  const getTotalExibicao = (orcamento) => {
+    if (orcamento?.totais?.totalGeral !== undefined) {
+      return orcamento.totais.totalGeral;
+    }
+    return calcularTotalLocal(orcamento);
+  };
+
+  // Filtro simples no cliente (opcional)
+  const orcamentosFiltrados = useMemo(() => {
+    const t = (busca || "").trim().toLowerCase();
+    if (!t) return orcamentos;
+    return orcamentos.filter(o => {
+      const nome = (o?.metadata?.nome || "").toLowerCase();
+      const cliente = (o?.metadata?.cliente || "").toLowerCase();
+      return nome.includes(t) || cliente.includes(t);
+    });
+  }, [orcamentos, busca]);
 
   if (carregando) {
     return (
@@ -116,6 +130,13 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-relevo-text font-heading">Gerenciar Orçamentos</h2>
         <div className="flex gap-2">
+          <input
+            placeholder="Buscar por nome/cliente"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            className="border rounded px-3 py-2 text-sm"
+            style={{minWidth: 240}}
+          />
           <button
             onClick={carregarLista}
             className="bg-relevo-green text-white px-4 py-2 rounded-lg hover:bg-relevo-green-light transition font-sans"
@@ -143,43 +164,49 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
             </tr>
           </thead>
           <tbody>
-            {orcamentos.map((orcamento) => (
-              <tr key={orcamento.id} className="border-b hover:bg-gray-50">
-                <td className="py-3 px-4">{orcamento.metadata?.nome || 'Sem nome'}</td>
-                <td className="py-3 px-4">{orcamento.metadata?.cliente || 'Não informado'}</td>
-                <td className="py-3 px-4">
-                  {orcamento.metadata?.data ? 
-                    new Date(orcamento.metadata.data + 'T00:00:00').toLocaleDateString('pt-BR') 
-                    : 'Não informada'
-                  }
-                </td>
-                <td className="py-3 px-4 text-right font-semibold">
-                  R$ {formatarValorBR(calcularTotal(orcamento))}
-                </td>
-                <td className="py-3 px-4 text-center">
-                  <div className="flex justify-center space-x-2">
-                    <button
-                      onClick={() => handleCarregar(orcamento.id)}
-                      className="bg-relevo-blue text-white px-3 py-1 rounded hover:bg-relevo-blue/90 transition text-sm font-sans"
-                    >
-                      Carregar
-                    </button>
-                    <button
-                      onClick={() => handleExcluir(orcamento.id, orcamento.metadata?.nome)}
-                      className="bg-relevo-orange text-white px-3 py-1 rounded hover:bg-relevo-orange/90 transition text-sm font-sans"
-                    >
-                      Excluir
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {orcamentosFiltrados.map((orcamento) => {
+              const valor = getTotalExibicao(orcamento);
+              const dataStr = orcamento?.metadata?.data 
+                ? new Date(orcamento.metadata.data + 'T00:00:00').toLocaleDateString('pt-BR')
+                : (orcamento?.atualizadoEm?.toDate 
+                    ? orcamento.atualizadoEm.toDate().toLocaleDateString('pt-BR')
+                    : (orcamento?.atualizadoEm 
+                        ? new Date(orcamento.atualizadoEm).toLocaleDateString('pt-BR')
+                        : '—'));
+
+              return (
+                <tr key={orcamento.id} className="border-b hover:bg-gray-50">
+                  <td className="py-3 px-4">{orcamento.metadata?.nome || 'Sem nome'}</td>
+                  <td className="py-3 px-4">{orcamento.metadata?.cliente || 'Não informado'}</td>
+                  <td className="py-3 px-4">{dataStr}</td>
+                  <td className="py-3 px-4 text-right font-semibold">
+                    R$ {formatarValorBR(valor)}
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <div className="flex justify-center space-x-2">
+                      <button
+                        onClick={() => handleCarregar(orcamento.id)}
+                        className="bg-relevo-blue text-white px-3 py-1 rounded hover:bg-relevo-blue/90 transition text-sm font-sans"
+                      >
+                        Carregar
+                      </button>
+                      <button
+                        onClick={() => handleExcluir(orcamento.id, orcamento.metadata?.nome)}
+                        className="bg-relevo-orange text-white px-3 py-1 rounded hover:bg-relevo-orange/90 transition text-sm font-sans"
+                      >
+                        Excluir
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 
-        {orcamentos.length === 0 && (
+        {orcamentosFiltrados.length === 0 && (
           <div className="text-center py-8 text-relevo-text/60 font-sans">
-            Nenhum orçamento salvo encontrado.
+            Nenhum orçamento encontrado para o filtro aplicado.
           </div>
         )}
       </div>
