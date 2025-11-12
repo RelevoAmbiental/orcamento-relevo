@@ -1,4 +1,4 @@
-// src/context/OrcamentoContext.jsx - VERSÃO CORRIGIDA
+// src/context/OrcamentoContext.jsx - VERSÃO ALINHADA À NOVA REGRA
 import React, { createContext, useContext, useReducer, useState } from 'react';
 import { orcamentoService } from '../firebase/orcamentos';
 import { 
@@ -12,15 +12,14 @@ import {
   validarLogistica 
 } from '../utils/validators';
 
-import { getAuth } from "firebase/auth";
-import { app } from "../firebase/config";
-
-const auth = getAuth(app);
-const user = auth.currentUser || null;
+// Usa o usuário propagado pelo portal (window.relevoUser) ou, se existir, o firebase global
+const userGlobal = (typeof window !== 'undefined')
+  ? (window.relevoUser || (window.firebase ? window.firebase.auth().currentUser : null))
+  : null;
 
 const OrcamentoContext = createContext();
 
-// Estado inicial completo - CORRIGIDO
+// ---------------------- ESTADO INICIAL ----------------------
 const initialState = {
   metadata: {
     nome: '',
@@ -83,7 +82,7 @@ const initialState = {
   ]
 };
 
-// Reducer para gerenciar o estado - MANTIDO IGUAL
+// ---------------------- REDUCER ----------------------
 function orcamentoReducer(state, action) {
   switch (action.type) {
     case 'UPDATE_METADATA':
@@ -98,17 +97,18 @@ function orcamentoReducer(state, action) {
         parametros: { ...state.parametros, ...action.payload }
       };
 
-    case 'UPDATE_COORDENACAO':
+    case 'UPDATE_COORDENACAO': {
       const coordenacaoAtualizada = state.coordenacao.map(item =>
         item.id === action.payload.id
           ? { ...item, ...action.payload.updates }
           : item
       );
       return { ...state, coordenacao: coordenacaoAtualizada };
+    }
 
-    case 'UPDATE_PROFISSIONAIS':
-      const itemExistenteProfissionais = state.profissionais.find(item => item.id === action.payload.id);
-      if (!itemExistenteProfissionais) {
+    case 'UPDATE_PROFISSIONAIS': {
+      const itemExistente = state.profissionais.find(item => item.id === action.payload.id);
+      if (!itemExistente) {
         return {
           ...state,
           profissionais: [...state.profissionais, { id: action.payload.id, ...action.payload.updates }]
@@ -120,10 +120,11 @@ function orcamentoReducer(state, action) {
           : item
       );
       return { ...state, profissionais: profissionaisAtualizados };
+    }
 
-    case 'UPDATE_VALORES_UNICOS':
-      const itemExistenteValores = state.valoresUnicos.find(item => item.id === action.payload.id);
-      if (!itemExistenteValores) {
+    case 'UPDATE_VALORES_UNICOS': {
+      const itemExistente = state.valoresUnicos.find(item => item.id === action.payload.id);
+      if (!itemExistente) {
         return {
           ...state,
           valoresUnicos: [...state.valoresUnicos, { id: action.payload.id, ...action.payload.updates }]
@@ -135,10 +136,11 @@ function orcamentoReducer(state, action) {
           : item
       );
       return { ...state, valoresUnicos: valoresAtualizados };
+    }
 
-    case 'UPDATE_LOGISTICA':
-      const itemExistenteLogistica = state.logistica.find(item => item.id === action.payload.id);
-      if (!itemExistenteLogistica) {
+    case 'UPDATE_LOGISTICA': {
+      const itemExistente = state.logistica.find(item => item.id === action.payload.id);
+      if (!itemExistente) {
         return {
           ...state,
           logistica: [...state.logistica, { id: action.payload.id, ...action.payload.updates }]
@@ -150,6 +152,7 @@ function orcamentoReducer(state, action) {
           : item
       );
       return { ...state, logistica: logisticaAtualizada };
+    }
 
     case 'CARREGAR_ORCAMENTO':
       return {
@@ -168,61 +171,55 @@ function orcamentoReducer(state, action) {
   }
 }
 
-// Função para calcular todos os totais – NOVA REGRA DE CÁLCULO
+// ---------------------- CÁLCULO DE TOTAIS (NOVO MODELO) ----------------------
 const calcularTotais = (state) => {
-  // --- Subtotais diretos ---
+  const n = (v) => (isNaN(v) || v === null || v === undefined ? 0 : Number(v));
+
+  // Subtotais diretos
   const subtotalCoordenacao = state.coordenacao.reduce((total, item) => {
-    const meses = (Number(item.dias) || 0) / 30;
-    const prolabore = Number(item.prolabore) || 0;
-    const quant = Number(item.quant) || 0;
-    return total + (meses * prolabore * quant);
+    const meses = n(item.dias) / 30;
+    return total + (meses * n(item.prolabore) * n(item.quant));
   }, 0);
 
   const subtotalProfissionais = state.profissionais.reduce((total, item) => {
-    const meses = (Number(item.dias) || 0) / 30;
-    const prolabore = Number(item.prolabore) || 0;
-    const pessoas = Number(item.pessoas) || 0;
-    return total + (meses * prolabore * pessoas);
+    const meses = n(item.dias) / 30;
+    return total + (meses * n(item.prolabore) * n(item.pessoas));
   }, 0);
 
   const subtotalValoresUnicos = state.valoresUnicos.reduce((total, item) => {
-    const valor = Number(item.valor) || 0;
-    const pessoas = Number(item.pessoas) || 0;
-    const dias = Number(item.dias) || 0;
-    return total + (valor * pessoas * dias);
+    return total + (n(item.valor) * n(item.pessoas) * n(item.dias));
   }, 0);
 
   const subtotalLogistica = state.logistica.reduce((total, item) => {
-    const valor = Number(item.valor) || 0;
-    const qtd = Number(item.qtd) || 0;
-    const dias = Number(item.dias) || 0;
-    return total + (valor * qtd * dias);
+    return total + (n(item.valor) * n(item.qtd) * n(item.dias));
   }, 0);
 
   const subtotalGeral = subtotalCoordenacao + subtotalProfissionais + subtotalValoresUnicos + subtotalLogistica;
 
-  // --- Indiretos (NÃO cumulativos; todos sobre subtotalGeral) ---
+  // Parâmetros
   const p = state.parametros || {};
-  const encargosPessoalValor = subtotalGeral * (Number(p.encargosPessoal) || 0);
-  const fundoGiroValor      = subtotalGeral * (Number(p.fundoGiro) || 0);
-  const lucroValor          = subtotalGeral * (Number(p.lucro) || 0);
-  const comissaoValor       = subtotalGeral * (Number(p.comissaoCaptacao) || 0);
+  const encargosPessoal = subtotalGeral * n(p.encargosPessoal);
+  const fundoGiro       = subtotalGeral * n(p.fundoGiro);
+  const lucro           = subtotalGeral * n(p.lucro);            // margem de lucro (R$)
+  const despesasFiscais = subtotalGeral * n(p.despesasFiscais);
+  const comissaoCaptacao = subtotalGeral * n(p.comissaoCaptacao);
 
-  const subtotalIndiretos = encargosPessoalValor + fundoGiroValor + lucroValor + comissaoValor;
+  const subtotalIndiretos =
+    encargosPessoal + fundoGiro + lucro + despesasFiscais + comissaoCaptacao;
 
-  // --- Impostos sobre (diretos + indiretos) ---
+  // Impostos sobre (diretos + indiretos)
   const baseImposto = subtotalGeral + subtotalIndiretos;
-  const impostos = baseImposto * (Number(p.imposto) || 0);
+  const impostos = baseImposto * n(p.imposto);
 
-  // --- Valor do orçamento (bruto) ---
-  const valorOrcamentoBruto = baseImposto + impostos;
+  // Custo total antes de desconto (diretos + indiretos + impostos)
+  const custoTotal = subtotalGeral + subtotalIndiretos;   // antes de impostos
+  const totalAntesDesconto = custoTotal + impostos;       // orçamento bruto
 
-  // --- Desconto sobre o valor do orçamento (bruto) ---
-  const descontoPerc = (state.metadata?.desconto || 0) / 100;
-  const desconto = valorOrcamentoBruto * descontoPerc;
+  // Desconto
+  const descontoPerc = n(state.metadata?.desconto) / 100;
+  const desconto = totalAntesDesconto * descontoPerc;
 
-  // --- Total final ---
-  const totalGeral = valorOrcamentoBruto - desconto;
+  const totalGeral = totalAntesDesconto - desconto;
 
   return {
     // Subtotais diretos
@@ -233,27 +230,29 @@ const calcularTotais = (state) => {
     subtotalGeral,
 
     // Indiretos detalhados
-    encargosPessoalValor,
-    fundoGiroValor,
-    lucroValor,
-    comissaoValor,
-    subtotalIndiretos,
+    encargosPessoal,
+    fundoGiro,
+    lucro,             // << margem de lucro em R$
+    despesasFiscais,
+    comissaoCaptacao,
 
-    // Impostos / desconto / totais
+    // Agregados
+    custoTotal,        // diretos + indiretos
     impostos,
-    valorOrcamentoBruto,  // total antes do desconto
+    totalAntesDesconto,
     desconto,
-    totalGeral            // total final
+    totalGeral
   };
 };
 
+// ---------------------- PROVIDER ----------------------
 export const OrcamentoProvider = ({ children }) => {
   const [state, dispatch] = useReducer(orcamentoReducer, initialState);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState(null);
   const [errosValidacao, setErrosValidacao] = useState([]);
 
-  // ⭐⭐ NOVAS FUNÇÕES DE VALIDAÇÃO ⭐⭐
+  // ---- Validação de campos ----
   const validarCampo = (secao, campo, valor, id = null) => {
     let errors = [];
     
@@ -264,34 +263,38 @@ export const OrcamentoProvider = ({ children }) => {
       case 'parametros':
         errors = validarParametros({ [campo]: valor });
         break;
-      case 'coordenacao':
-        const itemCoordenacao = state.coordenacao.find(item => item.id === id);
-        if (itemCoordenacao) {
-          const updatedItem = { ...itemCoordenacao, [campo]: valor };
-          errors = validarCoordenacao([updatedItem]);
+      case 'coordenacao': {
+        const item = state.coordenacao.find(i => i.id === id);
+        if (item) {
+          const updated = { ...item, [campo]: valor };
+          errors = validarCoordenacao([updated]);
         }
         break;
-      case 'profissionais':
-        const itemProfissional = state.profissionais.find(item => item.id === id);
-        if (itemProfissional) {
-          const updatedItem = { ...itemProfissional, [campo]: valor };
-          errors = validarProfissionais([updatedItem]);
+      }
+      case 'profissionais': {
+        const item = state.profissionais.find(i => i.id === id);
+        if (item) {
+          const updated = { ...item, [campo]: valor };
+          errors = validarProfissionais([updated]);
         }
         break;
-      case 'valoresUnicos':
-        const itemValorUnico = state.valoresUnicos.find(item => item.id === id);
-        if (itemValorUnico) {
-          const updatedItem = { ...itemValorUnico, [campo]: valor };
-          errors = validarValoresUnicos([updatedItem]);
+      }
+      case 'valoresUnicos': {
+        const item = state.valoresUnicos.find(i => i.id === id);
+        if (item) {
+          const updated = { ...item, [campo]: valor };
+          errors = validarValoresUnicos([updated]);
         }
         break;
-      case 'logistica':
-        const itemLogistica = state.logistica.find(item => item.id === id);
-        if (itemLogistica) {
-          const updatedItem = { ...itemLogistica, [campo]: valor };
-          errors = validarLogistica([updatedItem]);
+      }
+      case 'logistica': {
+        const item = state.logistica.find(i => i.id === id);
+        if (item) {
+          const updated = { ...item, [campo]: valor };
+          errors = validarLogistica([updated]);
         }
         break;
+      }
       default:
         break;
     }
@@ -309,9 +312,8 @@ export const OrcamentoProvider = ({ children }) => {
     setErrosValidacao([]);
   };
 
-  // ✅ RESUMO ALINHADO ÀS REGRAS (usa o mesmo cálculo da UI)
+  // ---- RESUMO COMPLETO (para salvar no Firestore e exportar) ----
   const calcularResumoCompleto = (orcamentoData) => {
-    // Reaproveita a função oficial de cálculo, simulando o "state"
     const simulado = {
       ...orcamentoData,
       parametros: { ...initialState.parametros, ...(orcamentoData.parametros || {}) },
@@ -325,33 +327,30 @@ export const OrcamentoProvider = ({ children }) => {
     const t = calcularTotais(simulado);
 
     return {
-      // Subtotais diretos
       subtotalCoordenacao: t.subtotalCoordenacao,
       subtotalProfissionais: t.subtotalProfissionais,
       subtotalValoresUnicos: t.subtotalValoresUnicos,
       subtotalLogistica: t.subtotalLogistica,
       subtotalGeral: t.subtotalGeral,
 
-      // Indiretos detalhados e soma
-      encargosPessoalValor: t.encargosPessoalValor,
-      fundoGiroValor: t.fundoGiroValor,
-      lucroValor: t.lucroValor,
-      comissaoValor: t.comissaoValor,
-      subtotalIndiretos: t.subtotalIndiretos,
+      encargosPessoal: t.encargosPessoal,
+      fundoGiro: t.fundoGiro,
+      lucro: t.lucro,
+      despesasFiscais: t.despesasFiscais,
+      comissaoCaptacao: t.comissaoCaptacao,
 
-      // Impostos / desconto / totais
+      custoTotal: t.custoTotal,
       impostos: t.impostos,
-      valorOrcamentoBruto: t.valorOrcamentoBruto,
+      totalAntesDesconto: t.totalAntesDesconto,
       desconto: t.desconto,
       totalGeral: t.totalGeral,
 
-      // Metadados
       calculadoEm: new Date().toISOString(),
       versaoCalculo: '2.0'
     };
   };
 
-  // ✅ APENAS UMA FUNÇÃO salvarOrcamento (REMOVA A OUTRA)
+  // ---- Salvar orçamento ----
   const salvarOrcamento = async (orcamentoData = state) => {
     const validacao = validarOrcamentoAtual();
     
@@ -379,7 +378,7 @@ export const OrcamentoProvider = ({ children }) => {
           ...orcamentoData.metadata,
           criadoEm: orcamentoData.metadata?.criadoEm || new Date().toISOString(),
           atualizadoEm: new Date().toISOString(),
-          criadoPor: user?.uid,
+          criadoPor: userGlobal?.uid || null,
           versao: '2.0'
         }
       }));
@@ -400,6 +399,7 @@ export const OrcamentoProvider = ({ children }) => {
     }
   };
 
+  // ---- Carregar orçamento ----
   const carregarOrcamento = async (id) => {
     setCarregando(true);
     setErro(null);
@@ -411,16 +411,8 @@ export const OrcamentoProvider = ({ children }) => {
       console.log('📦 Dados recebidos do Firebase:', orcamento);
       
       if (orcamento) {
-        console.log('🔄 Dispatchando CARREGAR_ORCAMENTO...');
-        console.log('📊 Dados que serão dispatchados:', {
-          metadata: orcamento.metadata,
-          coordenacao: orcamento.coordenacao?.length,
-          profissionais: orcamento.profissionais?.length
-        });
-        
         dispatch({ type: 'CARREGAR_ORCAMENTO', payload: orcamento });
-        
-        console.log('✅ Dispatch completo. Estado atualizado.');
+        console.log('✅ Estado atualizado com orçamento carregado.');
       } else {
         console.warn('⚠️ Orçamento NULO recebido do Firebase');
       }
@@ -435,6 +427,7 @@ export const OrcamentoProvider = ({ children }) => {
     }
   };
 
+  // ---- Atualizar / Excluir / Listar ----
   const atualizarOrcamento = async (id, orcamentoData) => {
     setCarregando(true);
     setErro(null);
@@ -469,15 +462,17 @@ export const OrcamentoProvider = ({ children }) => {
     
     try {
       const todosOrcamentos = await orcamentoService.listarOrcamentos();
-      const orcamentosDoUsuario = todosOrcamentos.filter(orc => 
-        orc.metadata?.criadoPor === user?.uid
-      );
-      
-      console.log(`📊 ${orcamentosDoUsuario.length} orçamentos do usuário ${user?.email}`);
-      console.log('📋 IDs únicos dos orçamentos:', orcamentosDoUsuario.map(o => o.id));
+      const uid = userGlobal?.uid || null;
+
+      const orcamentosFiltrados = uid
+        ? todosOrcamentos.filter(orc => orc.metadata?.criadoPor === uid)
+        : todosOrcamentos;
+
+      console.log(`📊 ${orcamentosFiltrados.length} orçamentos retornados (uid: ${uid || 'sem filtro'})`);
+      console.log('📋 IDs únicos dos orçamentos:', orcamentosFiltrados.map(o => o.id));
       
       setCarregando(false);
-      return orcamentosDoUsuario;
+      return orcamentosFiltrados;
     } catch (error) {
       setErro(error.message);
       setCarregando(false);
@@ -512,6 +507,7 @@ export const OrcamentoProvider = ({ children }) => {
   );
 };
 
+// Hook
 export const useOrcamento = () => {
   const context = useContext(OrcamentoContext);
   if (!context) {
