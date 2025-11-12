@@ -1,7 +1,19 @@
-// src/firebase/orcamentos.js - VERSÃO COMPLETA CORRIGIDA
+// src/firebase/orcamentos.js – versão corrigida (Firebase v9 modular)
 import { db } from './config';
+import { 
+  collection,
+  addDoc,
+  getDocs,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  query,
+  orderBy
+} from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
+// Referência global à coleção “orcamentos”
 const orcamentosRef = collection(db, 'orcamentos');
 
 /**
