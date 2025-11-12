@@ -1,9 +1,6 @@
 // src/firebase/orcamentos.js - VERSÃO COMPLETA CORRIGIDA
 import { db } from './config';
-import { 
-  collection, addDoc, updateDoc, deleteDoc, doc, 
-  getDocs, getDoc, query, orderBy 
-} from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 const orcamentosRef = collection(db, 'orcamentos');
 
