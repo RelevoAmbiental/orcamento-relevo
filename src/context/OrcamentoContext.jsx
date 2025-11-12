@@ -16,7 +16,8 @@ import { getAuth } from "firebase/auth";
 import { app } from "../firebase/config";
 
 const auth = getAuth(app);
-const user = window.relevoUser || auth.currentUser;
+const user = auth.currentUser || null;
+
 const OrcamentoContext = createContext();
 
 // Estado inicial completo - CORRIGIDO
@@ -105,20 +106,20 @@ function orcamentoReducer(state, action) {
       );
       return { ...state, coordenacao: coordenacaoAtualizada };
 
-  case 'UPDATE_PROFISSIONAIS':
-    const itemExistenteProfissionais = state.profissionais.find(item => item.id === action.payload.id);
-    if (!itemExistenteProfissionais) {
-      return {
-        ...state,
-        profissionais: [...state.profissionais, { id: action.payload.id, ...action.payload.updates }]
-      };
-    }
-    const profissionaisAtualizados = state.profissionais.map(item =>
-      item.id === action.payload.id
-        ? { ...item, ...action.payload.updates }
-        : item
-    );
-    return { ...state, profissionais: profissionaisAtualizados };
+    case 'UPDATE_PROFISSIONAIS':
+      const itemExistenteProfissionais = state.profissionais.find(item => item.id === action.payload.id);
+      if (!itemExistenteProfissionais) {
+        return {
+          ...state,
+          profissionais: [...state.profissionais, { id: action.payload.id, ...action.payload.updates }]
+        };
+      }
+      const profissionaisAtualizados = state.profissionais.map(item =>
+        item.id === action.payload.id
+          ? { ...item, ...action.payload.updates }
+          : item
+      );
+      return { ...state, profissionais: profissionaisAtualizados };
 
     case 'UPDATE_VALORES_UNICOS':
       const itemExistenteValores = state.valoresUnicos.find(item => item.id === action.payload.id);
@@ -167,66 +168,82 @@ function orcamentoReducer(state, action) {
   }
 }
 
-// Função para calcular todos os totais - MANTIDA IGUAL
+// Função para calcular todos os totais – NOVA REGRA DE CÁLCULO
 const calcularTotais = (state) => {
+  // --- Subtotais diretos ---
   const subtotalCoordenacao = state.coordenacao.reduce((total, item) => {
-    const meses = item.dias / 30;
-    return total + (meses * item.prolabore * item.quant);
+    const meses = (Number(item.dias) || 0) / 30;
+    const prolabore = Number(item.prolabore) || 0;
+    const quant = Number(item.quant) || 0;
+    return total + (meses * prolabore * quant);
   }, 0);
 
   const subtotalProfissionais = state.profissionais.reduce((total, item) => {
-    const meses = item.dias / 30;
-    return total + (meses * item.prolabore * item.pessoas);
+    const meses = (Number(item.dias) || 0) / 30;
+    const prolabore = Number(item.prolabore) || 0;
+    const pessoas = Number(item.pessoas) || 0;
+    return total + (meses * prolabore * pessoas);
   }, 0);
 
   const subtotalValoresUnicos = state.valoresUnicos.reduce((total, item) => {
-    return total + (item.valor * item.pessoas * item.dias);
+    const valor = Number(item.valor) || 0;
+    const pessoas = Number(item.pessoas) || 0;
+    const dias = Number(item.dias) || 0;
+    return total + (valor * pessoas * dias);
   }, 0);
 
   const subtotalLogistica = state.logistica.reduce((total, item) => {
-    return total + (item.valor * item.qtd * item.dias);
+    const valor = Number(item.valor) || 0;
+    const qtd = Number(item.qtd) || 0;
+    const dias = Number(item.dias) || 0;
+    return total + (valor * qtd * dias);
   }, 0);
 
   const subtotalGeral = subtotalCoordenacao + subtotalProfissionais + subtotalValoresUnicos + subtotalLogistica;
 
-  const baseFolhaPagamento = subtotalCoordenacao + subtotalProfissionais;
-  const encargosPessoal = baseFolhaPagamento * state.parametros.encargosPessoal;
+  // --- Indiretos (NÃO cumulativos; todos sobre subtotalGeral) ---
+  const p = state.parametros || {};
+  const encargosPessoalValor = subtotalGeral * (Number(p.encargosPessoal) || 0);
+  const fundoGiroValor      = subtotalGeral * (Number(p.fundoGiro) || 0);
+  const lucroValor          = subtotalGeral * (Number(p.lucro) || 0);
+  const comissaoValor       = subtotalGeral * (Number(p.comissaoCaptacao) || 0);
 
-  const custoTotal = subtotalGeral + encargosPessoal;
+  const subtotalIndiretos = encargosPessoalValor + fundoGiroValor + lucroValor + comissaoValor;
 
-  const lucro = custoTotal * state.parametros.lucro;
-  const fundoGiro = custoTotal * state.parametros.fundoGiro;
+  // --- Impostos sobre (diretos + indiretos) ---
+  const baseImposto = subtotalGeral + subtotalIndiretos;
+  const impostos = baseImposto * (Number(p.imposto) || 0);
 
-  const subtotalComLucroFundo = custoTotal + lucro + fundoGiro;
+  // --- Valor do orçamento (bruto) ---
+  const valorOrcamentoBruto = baseImposto + impostos;
 
-  const impostos = subtotalComLucroFundo * state.parametros.imposto;
+  // --- Desconto sobre o valor do orçamento (bruto) ---
+  const descontoPerc = (state.metadata?.desconto || 0) / 100;
+  const desconto = valorOrcamentoBruto * descontoPerc;
 
-  const despesasFiscais = custoTotal * state.parametros.despesasFiscais;
-  const comissaoCaptacao = custoTotal * state.parametros.comissaoCaptacao;
-
-  const totalAntesDesconto = subtotalComLucroFundo + impostos + despesasFiscais + comissaoCaptacao;
-
-  const desconto = totalAntesDesconto * (state.metadata.desconto / 100);
-  const totalGeral = totalAntesDesconto - desconto;
+  // --- Total final ---
+  const totalGeral = valorOrcamentoBruto - desconto;
 
   return {
+    // Subtotais diretos
     subtotalCoordenacao,
     subtotalProfissionais,
     subtotalValoresUnicos,
     subtotalLogistica,
     subtotalGeral,
-    baseFolhaPagamento,
-    custoTotal,
-    subtotalComLucroFundo,
-    encargosPessoal,
-    lucro,
-    fundoGiro,
+
+    // Indiretos detalhados
+    encargosPessoalValor,
+    fundoGiroValor,
+    lucroValor,
+    comissaoValor,
+    subtotalIndiretos,
+
+    // Impostos / desconto / totais
     impostos,
-    despesasFiscais,
-    comissaoCaptacao,
-    totalAntesDesconto,
+    valorOrcamentoBruto,  // total antes do desconto
     desconto,
-    totalGeral
+    totalGeral            // total final
   };
 };
 
@@ -292,47 +309,45 @@ export const OrcamentoProvider = ({ children }) => {
     setErrosValidacao([]);
   };
 
-  // ✅ FUNÇÃO PARA CALCULAR RESUMO COMPLETO (CRÍTICO PARA PDF/CSV)
+  // ✅ RESUMO ALINHADO ÀS REGRAS (usa o mesmo cálculo da UI)
   const calcularResumoCompleto = (orcamentoData) => {
-    // CALCULAR TOTAIS DOS SERVIÇOS
-    const totalCoordenacao = orcamentoData.coordenacao?.reduce((sum, item) => 
-      sum + (item.valorTotal || 0), 0) || 0;
-    
-    const totalProfissionais = orcamentoData.profissionais?.reduce((sum, item) => 
-      sum + (item.valorTotal || 0), 0) || 0;
-    
-    const totalValoresUnicos = orcamentoData.valoresUnicos?.reduce((sum, item) => 
-      sum + (item.valorTotal || 0), 0) || 0;
-    
-    const totalLogistica = orcamentoData.logistica?.reduce((sum, item) => 
-      sum + (item.valorTotal || 0), 0) || 0;
-    
-    const totalServicos = totalCoordenacao + totalProfissionais + totalValoresUnicos + totalLogistica;
-    
-    // CALCULAR CUSTOS E MARGENS
-    const custosIndiretos = orcamentoData.custosIndiretos || 0;
-    const margemLucroPercentual = orcamentoData.margemLucro || 0.3;
-    const taxaAdministrativaPercentual = orcamentoData.taxaAdministrativa || 0.1;
-    
-    const margemLucro = totalServicos * margemLucroPercentual;
-    const taxaAdministrativa = totalServicos * taxaAdministrativaPercentual;
-    
-    const valorTotal = totalServicos + custosIndiretos + margemLucro + taxaAdministrativa;
-    
+    // Reaproveita a função oficial de cálculo, simulando o "state"
+    const simulado = {
+      ...orcamentoData,
+      parametros: { ...initialState.parametros, ...(orcamentoData.parametros || {}) },
+      metadata:   { ...initialState.metadata,   ...(orcamentoData.metadata || {}) },
+      coordenacao:   orcamentoData.coordenacao   || [],
+      profissionais: orcamentoData.profissionais || [],
+      valoresUnicos: orcamentoData.valoresUnicos || [],
+      logistica:     orcamentoData.logistica     || []
+    };
+
+    const t = calcularTotais(simulado);
+
     return {
-      totalCoordenacao,
-      totalProfissionais, 
-      totalValoresUnicos,
-      totalLogistica,
-      totalServicos,
-      custosIndiretos,
-      margemLucroPercentual,
-      margemLucro,
-      taxaAdministrativaPercentual, 
-      taxaAdministrativa,
-      valorTotal,
+      // Subtotais diretos
+      subtotalCoordenacao: t.subtotalCoordenacao,
+      subtotalProfissionais: t.subtotalProfissionais,
+      subtotalValoresUnicos: t.subtotalValoresUnicos,
+      subtotalLogistica: t.subtotalLogistica,
+      subtotalGeral: t.subtotalGeral,
+
+      // Indiretos detalhados e soma
+      encargosPessoalValor: t.encargosPessoalValor,
+      fundoGiroValor: t.fundoGiroValor,
+      lucroValor: t.lucroValor,
+      comissaoValor: t.comissaoValor,
+      subtotalIndiretos: t.subtotalIndiretos,
+
+      // Impostos / desconto / totais
+      impostos: t.impostos,
+      valorOrcamentoBruto: t.valorOrcamentoBruto,
+      desconto: t.desconto,
+      totalGeral: t.totalGeral,
+
+      // Metadados
       calculadoEm: new Date().toISOString(),
-      versaoCalculo: '1.0'
+      versaoCalculo: '2.0'
     };
   };
 
