@@ -12,7 +12,11 @@ import {
   validarLogistica 
 } from '../utils/validators';
 
-const user = window.relevoUser || firebase.auth().currentUser;
+import { getAuth } from "firebase/auth";
+import { app } from "../firebase/config";
+
+const auth = getAuth(app);
+const user = window.relevoUser || auth.currentUser;
 const OrcamentoContext = createContext();
 
 // Estado inicial completo - CORRIGIDO
