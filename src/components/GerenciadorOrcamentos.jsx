@@ -128,7 +128,7 @@ const GerenciadorOrcamentos = ({ setMostrarGerenciador }) => {
   return (
     <div className="bg-white rounded-lg">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-relevo-text font-heading">Gerenciar Orçamentos</h2>
+        {/* Título removido aqui para evitar duplicidade com o Header */}
         <div className="flex gap-2">
           <input
             placeholder="Buscar por nome/cliente"
