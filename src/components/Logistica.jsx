@@ -87,6 +87,7 @@ const Logistica = () => {
                     <input
                       type="number"
                       min="0"
+                      onInput={(e) => { if (e.target.value < 0) e.target.value = 0; }}
                       value={item.valor}
                       onChange={(e) => handleLogisticaChange(item.id, 'valor', e.target.value)}
                       className={getInputClassName('valor', item.valor)}
@@ -113,6 +114,7 @@ const Logistica = () => {
                     <input
                       type="number"
                       min="0"
+                      onInput={(e) => { if (e.target.value < 0) e.target.value = 0; }}
                       value={item.qtd}
                       onChange={(e) => handleLogisticaChange(item.id, 'qtd', e.target.value)}
                       className={getInputClassName('qtd', item.qtd)}
@@ -122,6 +124,7 @@ const Logistica = () => {
                     <input
                       type="number"
                       min="0"
+                      onInput={(e) => { if (e.target.value < 0) e.target.value = 0; }}
                       value={item.dias}
                       onChange={(e) => handleLogisticaChange(item.id, 'dias', e.target.value)}
                       className={getInputClassName('dias', item.dias)}
