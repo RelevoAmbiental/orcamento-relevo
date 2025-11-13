@@ -102,55 +102,52 @@ const orcamentosRef = collection(db, 'orcamentos');
 
 export const orcamentoService = {
   // Criar novo orçamento (salva já com totais calculados)
-  async criarOrcamento(orcamentoData) {
-    try {
-      console.log('💾 Iniciando salvamento no Firebase...');
+   async criarOrcamento(orcamentoData) {
+      try {
+        console.log('💾 Iniciando salvamento no Firebase...');
   
-      // Cálculo antes de persistir
-      const totais = calcularTotaisPersistentes(orcamentoData);
+        const totais = calcularTotaisPersistentes(orcamentoData);
   
-      const payload = {
-        ...orcamentoData,
-        totais,
-        criadoEm: new Date(),
-        atualizadoEm: new Date(),
-        versao: orcamentoData.metadata?.versao || 1
-      };
+        const payload = {
+          ...orcamentoData,
+          totais,
+          criadoEm: new Date(),
+          atualizadoEm: new Date(),
+          versao: orcamentoData.metadata?.versao || 1
+        };
   
-      // SALVA o documento no Firebase
-      const docRef = await addDoc(orcamentosRef, payload);
+        const docRef = await addDoc(orcamentosRef, payload);
   
-      // 🔥 SALVA O ID REAL DENTRO DO DOCUMENTO
-      await updateDoc(docRef, { id: docRef.id });
+        await updateDoc(docRef, { id: docRef.id });
   
-      console.log('🎯 NOVO ORÇAMENTO SALVO com ID único:', docRef.id);
-      return docRef.id;
+        console.log('🎯 NOVO ORÇAMENTO SALVO com ID único:', docRef.id);
+        return docRef.id;
   
-    } catch (error) {
-      console.error('❌ Erro crítico ao criar orçamento:', error);
-      throw new Error(`Falha ao salvar orçamento: ${error.message}`);
-    }
-  }
-
-  // Buscar todos os orçamentos (ordenados por atualizadoEm desc)
-  async listarOrcamentos() {
-    try {
-      console.log('🔄 Buscando orçamentos no Firebase (ordem: atualizadoEm desc)...');
-      const q = query(orcamentosRef, orderBy('atualizadoEm', 'desc'));
-      const querySnapshot = await getDocs(q);
-
-      const orcamentos = querySnapshot.docs.map(d => ({
-        id: d.id,
-        ...d.data()
-      }));
-
-      console.log(`${orcamentos.length} documentos encontrados no total`);
-      return orcamentos;
-    } catch (error) {
-      console.error('Erro ao listar orçamentos:', error);
-      throw new Error(`Falha ao carregar orçamentos: ${error.message}`);
-    }
-  },
+      } catch (error) {
+        console.error('❌ Erro crítico ao criar orçamento:', error);
+        throw new Error(`Falha ao salvar orçamento: ${error.message}`);
+      }
+    },   // 👈 ESSA VÍRGULA FALTAVA AQUI! 👈👈👈
+  
+    // Buscar todos os orçamentos
+    async listarOrcamentos() {
+      try {
+        console.log('🔄 Buscando orçamentos no Firebase (ordem: atualizadoEm desc)...');
+        const q = query(orcamentosRef, orderBy('atualizadoEm', 'desc'));
+        const querySnapshot = await getDocs(q);
+  
+        const orcamentos = querySnapshot.docs.map(d => ({
+          id: d.id,
+          ...d.data()
+        }));
+  
+        console.log(`${orcamentos.length} documentos encontrados no total`);
+        return orcamentos;
+      } catch (error) {
+        console.error('Erro ao listar orçamentos:', error);
+        throw new Error(`Falha ao carregar orçamentos: ${error.message}`);
+      }
+    },
 
   // Buscar orçamento específico
   async buscarOrcamento(id) {
