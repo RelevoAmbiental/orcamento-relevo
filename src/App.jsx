@@ -46,7 +46,6 @@ const ProtectedApp = () => {
 
           {/* 💚 RESUMOS – agora visíveis no final da página */}
           <CardCustosDiretos />   {/* Card executivo de custos diretos */}
-          <ResumoTotal />         {/* Resumo completo com indiretos, impostos e total */}
 
         </main>
       </div>
