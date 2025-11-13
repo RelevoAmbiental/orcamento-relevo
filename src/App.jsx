@@ -11,6 +11,7 @@ import ValoresUnicos from './components/ValoresUnicos';
 import Logistica from './components/Logistica';
 
 import CardCustosDiretos from './components/CardCustosDiretos';   // ✅ NOVO
+import ResumoTotal from './components/ResumoTotal'; 
 
 import LoginRedirect from './components/LoginRedirect';
 import LoadingScreen from './components/LoadingScreen';
