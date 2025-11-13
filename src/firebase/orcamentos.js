@@ -20,82 +20,85 @@ const orcamentosRef = collection(db, 'orcamentos');
  * Calcula e retorna um objeto com todos os totais e parciais
  * para serem PERSISTIDOS no Firestore.
  */
-function calcularTotaisPersistentes(orcamento) {
-  const safe = (n) => (isNaN(n) || n === null || n === undefined ? 0 : Number(n));
-
-  // Subtotais por grupo
-  const subtotalCoordenacao = (orcamento.coordenacao || []).reduce((total, item) => {
-    const dias = safe(item.dias);
-    const meses = dias / 30; // regra já utilizada no componente
-    const subtotal = safe(item.subtotal);
-    const quant = safe(item.quant);
-    return total + (meses * subtotal * quant);
-  }, 0);
-
-  const subtotalProfissionais = (orcamento.profissionais || []).reduce((total, item) => {
-    const dias = safe(item.dias);
-    const meses = dias / 30;
-    const prolabore = safe(item.prolabore);
-    const pessoas = safe(item.pessoas);
-    return total + (meses * prolabore * pessoas);
-  }, 0);
-
-  const subtotalValoresUnicos = (orcamento.valoresUnicos || []).reduce((total, item) => {
-    const valor = safe(item.valor);
-    const pessoas = safe(item.pessoas);
-    const dias = safe(item.dias);
-    return total + (valor * pessoas * dias);
-  }, 0);
-
-  const subtotalLogistica = (orcamento.logistica || []).reduce((total, item) => {
-    const valor = safe(item.valor);
-    const qtd = safe(item.qtd);
-    const dias = safe(item.dias);
-    return total + (valor * qtd * dias);
-  }, 0);
-
-  const subtotalGeral = subtotalCoordenacao + subtotalProfissionais + subtotalValoresUnicos + subtotalLogistica;
-
-  // Parâmetros (percentuais em fração: 0.10 = 10%)
-  const p = orcamento.parametros || {};
-  const encargosPessoal   = (subtotalCoordenacao + subtotalProfissionais) * safe(p.encargosPessoal);
-  const custoTotal        = subtotalGeral + encargosPessoal;
-  const lucro             = custoTotal * safe(p.lucro);
-  const fundoGiro         = custoTotal * safe(p.fundoGiro);
-  const subtotalComLucroFundo = custoTotal + lucro + fundoGiro;
-
-  const impostos          = subtotalComLucroFundo * safe(p.imposto);
-  const despesasFiscais   = custoTotal * safe(p.despesasFiscais);
-  const comissaoCaptacao  = custoTotal * safe(p.comissaoCaptacao);
-
-  const totalAntesDesconto = subtotalComLucroFundo + impostos + despesasFiscais + comissaoCaptacao;
-
-  // Desconto (% armazenado em metadata.desconto)
-  const descontoPercent = safe(orcamento?.metadata?.desconto) / 100;
-  const desconto        = totalAntesDesconto * descontoPercent;
-  const totalGeral      = totalAntesDesconto - desconto;
-
-  return {
-    categorias: {
-      coordenacao: subtotalCoordenacao,
-      profissionais: subtotalProfissionais,
-      valoresUnicos: subtotalValoresUnicos,
-      logistica: subtotalLogistica,
-    },
-    encargosPessoal,
-    custoTotal,
-    lucro,
-    fundoGiro,
-    impostos,
-    despesasFiscais,
-    comissaoCaptacao,
-    subtotal: subtotalGeral,
-    subtotalComLucroFundo,
-    totalAntesDesconto,
-    desconto,
-    totalGeral
-  };
-}
+  function calcularTotaisPersistentes(orcamento) {
+    const safe = (n) => (isNaN(n) || n === null || n === undefined ? 0 : Number(n));
+  
+    // 📌 SUBTOTAIS POR GRUPO
+    const subtotalCoordenacao = (orcamento.coordenacao || []).reduce((total, item) => {
+      const meses = safe(item.dias) / 30;
+      return total + (meses * safe(item.prolabore) * safe(item.quant));
+    }, 0);
+  
+    const subtotalProfissionais = (orcamento.profissionais || []).reduce((total, item) => {
+      const meses = safe(item.dias) / 30;
+      return total + (meses * safe(item.prolabore) * safe(item.pessoas));
+    }, 0);
+  
+    const subtotalValoresUnicos = (orcamento.valoresUnicos || []).reduce((total, item) => {
+      return total + safe(item.valor) * safe(item.pessoas) * safe(item.dias);
+    }, 0);
+  
+    const subtotalLogistica = (orcamento.logistica || []).reduce((total, item) => {
+      return total + safe(item.valor) * safe(item.qtd) * safe(item.dias);
+    }, 0);
+  
+    // SOMA GERAL DOS CUSTOS DIRETOS
+    const subtotalGeral = 
+        subtotalCoordenacao + 
+        subtotalProfissionais + 
+        subtotalValoresUnicos + 
+        subtotalLogistica;
+  
+    // PARÂMETROS
+    const p = orcamento.parametros || {};
+  
+    // CUSTOS INDIRETOS — TODOS DIRETAMENTE SOBRE O SUBTOTAL
+    const encargosPessoal  = subtotalGeral * safe(p.encargosPessoal);
+    const lucro            = subtotalGeral * safe(p.lucro);
+    const fundoGiro        = subtotalGeral * safe(p.fundoGiro);
+    const comissaoCaptacao = subtotalGeral * safe(p.comissaoCaptacao);
+    const despesasFiscais  = subtotalGeral * safe(p.despesasFiscais);
+  
+    // TOTAL INDIRETOS
+    const totalIndiretos = encargosPessoal + lucro + fundoGiro + comissaoCaptacao + despesasFiscais;
+  
+    // BASE PARA IMPOSTOS
+    const totalBase = subtotalGeral + totalIndiretos;
+  
+    // IMPOSTOS (percentual)
+    const impostos = totalBase * safe(p.imposto);
+  
+    // TOTAL PRE-DESCONTO
+    const totalAntesDesconto = totalBase + impostos;
+  
+    // DESCONTO
+    const descontoPercent = safe(orcamento?.metadata?.desconto) / 100;
+    const desconto = totalAntesDesconto * descontoPercent;
+  
+    // TOTAL FINAL
+    const totalGeral = totalAntesDesconto - desconto;
+  
+    return {
+      categorias: {
+        coordenacao: subtotalCoordenacao,
+        profissionais: subtotalProfissionais,
+        valoresUnicos: subtotalValoresUnicos,
+        logistica: subtotalLogistica,
+      },
+      subtotalGeral,
+      encargosPessoal,
+      lucro,
+      fundoGiro,
+      comissaoCaptacao,
+      despesasFiscais,
+      impostos,
+      totalIndiretos,
+      totalBase,
+      totalAntesDesconto,
+      desconto,
+      totalGeral
+    };
+  }
 
 export const orcamentoService = {
   // Criar novo orçamento (salva já com totais calculados)
