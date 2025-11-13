@@ -105,10 +105,10 @@ export const orcamentoService = {
   async criarOrcamento(orcamentoData) {
     try {
       console.log('💾 Iniciando salvamento no Firebase...');
-
+  
       // Cálculo antes de persistir
       const totais = calcularTotaisPersistentes(orcamentoData);
-
+  
       const payload = {
         ...orcamentoData,
         totais,
@@ -116,26 +116,21 @@ export const orcamentoService = {
         atualizadoEm: new Date(),
         versao: orcamentoData.metadata?.versao || 1
       };
-
-      // LOGS DE MONITORAMENTO
-      console.log('🔍 Estrutura sendo salva:', {
-        metadata: payload.metadata,
-        coordenacaoCount: payload.coordenacao?.length,
-        profissionaisCount: payload.profissionais?.length,
-        totaisResumo: {
-          subtotal: payload.totais.subtotal,
-          totalGeral: payload.totais.totalGeral
-        }
-      });
-
+  
+      // SALVA o documento no Firebase
       const docRef = await addDoc(orcamentosRef, payload);
+  
+      // 🔥 SALVA O ID REAL DENTRO DO DOCUMENTO
+      await updateDoc(docRef, { id: docRef.id });
+  
       console.log('🎯 NOVO ORÇAMENTO SALVO com ID único:', docRef.id);
       return docRef.id;
+  
     } catch (error) {
       console.error('❌ Erro crítico ao criar orçamento:', error);
       throw new Error(`Falha ao salvar orçamento: ${error.message}`);
     }
-  },
+  }
 
   // Buscar todos os orçamentos (ordenados por atualizadoEm desc)
   async listarOrcamentos() {
