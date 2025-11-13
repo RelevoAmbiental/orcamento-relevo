@@ -5,98 +5,151 @@ import { formatarValorBR } from '../utils/formatters';
 const ResumoTotal = () => {
   const { totais } = useOrcamento();
 
+  // Cálculo de percentuais
+  const pct = (v) =>
+    totais.totalGeral > 0 ? ((v / totais.totalGeral) * 100).toFixed(1).replace('.', ',') : '0,0';
+
+  const subtotalIndiretos =
+    totais.encargosPessoal +
+    totais.fundoGiro +
+    totais.lucro +
+    totais.despesasFiscais +
+    totais.comissaoCaptacao;
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 className="text-xl font-bold mb-4 text-relevo-text font-heading">Resumo Total do Orçamento</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Subtotais */}
-        <div className="space-y-3">
-          <h3 className="font-semibold text-relevo-text/80 font-heading">Subtotais por Categoria</h3>
-          <div className="flex justify-between border-b pb-2">
-            <span className="text-relevo-text/70 font-sans">Coordenação:</span>
-            <span className="font-medium">R$ {formatarValorBR(totais.subtotalCoordenacao)}</span>
-          </div>
-          <div className="flex justify-between border-b pb-2">
-            <span className="text-relevo-text/70 font-sans">Profissionais:</span>
-            <span className="font-medium">R$ {formatarValorBR(totais.subtotalProfissionais)}</span>
-          </div>
-          <div className="flex justify-between border-b pb-2">
-            <span className="text-relevo-text/70 font-sans">Valores Únicos:</span>
-            <span className="font-medium">R$ {formatarValorBR(totais.subtotalValoresUnicos)}</span>
-          </div>
-          <div className="flex justify-between border-b pb-2">
-            <span className="text-relevo-text/70 font-sans">Logística:</span>
-            <span className="font-medium">R$ {formatarValorBR(totais.subtotalLogistica)}</span>
-          </div>
-          <div className="flex justify-between border-b-2 border-gray-300 pb-2 font-semibold">
-            <span className="text-relevo-text font-heading">Subtotal Geral:</span>
-            <span className="text-relevo-blue font-sans">R$ {formatarValorBR(totais.subtotalGeral)}</span>
-          </div>
-        </div>
+      <h2 className="text-xl font-bold mb-6 text-relevo-text font-heading">
+        Resumo Consolidado do Orçamento
+      </h2>
 
-        {/* Custos Indiretos e Total */}
-        <div className="space-y-3">
-          <h3 className="font-semibold text-relevo-text/80 font-heading">Custos Indiretos e Total</h3>
-          <div className="flex justify-between border-b pb-2">
-            <span className="text-relevo-text/70 font-sans">Despesas Fiscais:</span>
-            <span className="font-medium">R$ {formatarValorBR(totais.despesasFiscais)}</span>
-          </div>
-          <div className="flex justify-between border-b pb-2">
-            <span className="text-relevo-text/70 font-sans">Lucro:</span>
-            <span className="font-medium">R$ {formatarValorBR(totais.lucro)}</span>
-          </div>
-          <div className="flex justify-between border-b pb-2">
-            <span className="text-relevo-text/70 font-sans">Fundo de Giro:</span>
-            <span className="font-medium">R$ {formatarValorBR(totais.fundoGiro)}</span>
-          </div>
-          <div className="flex justify-between border-b pb-2">
-            <span className="text-relevo-text/70 font-sans">Encargos Pessoal:</span>
-            <span className="font-medium">R$ {formatarValorBR(totais.encargosPessoal)}</span>
-          </div>
-          <div className="flex justify-between border-b pb-2">
-            <span className="text-relevo-text/70 font-sans">Impostos:</span>
-            <span className="font-medium">R$ {formatarValorBR(totais.impostos)}</span>
-          </div>
-          <div className="flex justify-between border-b-2 border-gray-300 pb-2 font-semibold text-lg">
-            <span className="text-relevo-text font-heading">TOTAL GERAL:</span>
-            <span className="text-relevo-green font-sans">R$ {formatarValorBR(totais.totalGeral)}</span>
-          </div>
+      {/* =============================== */}
+      {/*       BLOCOS DE CUSTOS DIRETOS  */}
+      {/* =============================== */}
+
+      <div className="mb-8">
+        <h3 className="font-semibold text-relevo-text/80 font-heading mb-3">
+          Custos Diretos (por categoria)
+        </h3>
+
+        <div className="space-y-2">
+          <Linha label="Coordenação" valor={totais.subtotalCoordenacao} />
+          <Linha label="Profissionais" valor={totais.subtotalProfissionais} />
+          <Linha label="Valores Únicos" valor={totais.subtotalValoresUnicos} />
+          <Linha label="Logística" valor={totais.subtotalLogistica} />
+
+          <LinhaTotal
+            label="Subtotal Geral de Custos Diretos"
+            valor={totais.subtotalGeral}
+            highlight
+          />
         </div>
       </div>
 
-      {/* Margens */}
-      <div className="mt-6 p-4 bg-relevo-light-gray rounded-lg">
-        <h3 className="font-semibold text-relevo-blue font-heading mb-2">Análise de Margens</h3>
+      {/* =============================== */}
+      {/*       BLOCOS DE INDIRETOS       */}
+      {/* =============================== */}
+
+      <div className="mb-8">
+        <h3 className="font-semibold text-relevo-text/80 font-heading mb-3">
+          Custos Indiretos (percentuais sobre o subtotal geral)
+        </h3>
+
+        <div className="space-y-2">
+          <Linha label="Encargos Pessoais" valor={totais.encargosPessoal} />
+          <Linha label="Fundo de Giro" valor={totais.fundoGiro} />
+          <Linha label="Lucro (Margem)" valor={totais.lucro} />
+          <Linha label="Despesas Fiscais" valor={totais.despesasFiscais} />
+          <Linha label="Comissão de Captação" valor={totais.comissaoCaptacao} />
+
+          <LinhaTotal
+            label="Subtotal de Custos Indiretos"
+            valor={subtotalIndiretos}
+            highlight
+          />
+        </div>
+      </div>
+
+      {/* =============================== */}
+      {/*            IMPOSTOS             */}
+      {/* =============================== */}
+
+      <div className="mb-8">
+        <h3 className="font-semibold text-relevo-text/80 font-heading mb-3">Impostos</h3>
+        <LinhaTotal label="Impostos calculados sobre (Diretos + Indiretos)" valor={totais.impostos} />
+      </div>
+
+      {/* =============================== */}
+      {/*   TOTAL ANTES DO DESCONTO       */}
+      {/* =============================== */}
+
+      <div className="mb-8">
+        <h3 className="font-semibold text-relevo-text/80 font-heading mb-3">
+          Total Antes do Desconto
+        </h3>
+
+        <LinhaTotal label="Valor Base" valor={totais.totalAntesDesconto} />
+        <Linha label="Desconto Aplicado" valor={totais.desconto} />
+
+        <LinhaTotal
+          label="Total Final do Orçamento"
+          valor={totais.totalGeral}
+          highlightStrong
+        />
+      </div>
+
+      {/* =============================== */}
+      {/*           MARGENS (%)           */}
+      {/* =============================== */}
+
+      <div className="mt-8 p-4 bg-relevo-light-gray rounded-lg">
+        <h3 className="font-semibold text-relevo-blue font-heading mb-2">Análise Percentual</h3>
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div className="text-center">
-            <div className="text-relevo-blue font-sans font-semibold">
-              {((totais.lucro / totais.totalGeral) * 100).toFixed(1).replace('.', ',')}%
-            </div>
-            <div className="text-relevo-blue/80 font-sans text-xs">Margem de Lucro</div>
-          </div>
-          <div className="text-center">
-            <div className="text-relevo-blue font-sans font-semibold">
-              {((totais.impostos / totais.totalGeral) * 100).toFixed(1).replace('.', ',')}%
-            </div>
-            <div className="text-relevo-blue/80 font-sans text-xs">Impostos</div>
-          </div>
-          <div className="text-center">
-            <div className="text-relevo-blue font-sans font-semibold">
-              {((totais.subtotalGeral / totais.totalGeral) * 100).toFixed(1).replace('.', ',')}%
-            </div>
-            <div className="text-relevo-blue/80 font-sans text-xs">Custos Diretos</div>
-          </div>
-          <div className="text-center">
-            <div className="text-relevo-blue font-sans font-semibold">
-              {100 - ((totais.subtotalGeral / totais.totalGeral) * 100).toFixed(1).replace('.', ',')}%
-            </div>
-            <div className="text-relevo-blue/80 font-sans text-xs">Custos Indiretos</div>
-          </div>
+          <BlocoPercentual label="Margem de Lucro" valor={pct(totais.lucro)} />
+          <BlocoPercentual label="Impostos" valor={pct(totais.impostos)} />
+          <BlocoPercentual label="Custos Diretos" valor={pct(totais.subtotalGeral)} />
+          <BlocoPercentual
+            label="Custos Indiretos"
+            valor={pct(subtotalIndiretos)}
+          />
         </div>
       </div>
     </div>
   );
 };
+
+/* COMPONENTES DE UI REUTILIZÁVEIS */
+
+const Linha = ({ label, valor }) => (
+  <div className="flex justify-between border-b pb-2">
+    <span className="text-relevo-text/70 font-sans">{label}:</span>
+    <span className="font-medium">R$ {formatarValorBR(valor)}</span>
+  </div>
+);
+
+const LinhaTotal = ({ label, valor, highlight, highlightStrong }) => (
+  <div
+    className={`flex justify-between pb-3 border-b-2 ${
+      highlightStrong
+        ? 'border-relevo-green text-lg font-bold'
+        : highlight
+        ? 'border-gray-300 font-semibold'
+        : 'border-gray-200'
+    }`}
+  >
+    <span className="text-relevo-text font-heading">{label}</span>
+    <span className={highlightStrong ? 'text-relevo-green' : 'text-relevo-blue'}>
+      R$ {formatarValorBR(valor)}
+    </span>
+  </div>
+);
+
+const BlocoPercentual = ({ label, valor }) => (
+  <div className="text-center">
+    <div className="text-relevo-blue font-sans font-semibold">{valor}%</div>
+    <div className="text-relevo-blue/80 font-sans text-xs">{label}</div>
+  </div>
+);
 
 export default ResumoTotal;
