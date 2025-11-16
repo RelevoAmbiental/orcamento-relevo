@@ -48,22 +48,24 @@ export function gerarCSV(orcamento, totais) {
         (Number(item.prolabore) || 0) *
         (Number(item.pessoas) || 0);
   
-      const nome = item.cargo || item.profissional || item.item || "Profissional";
-  
-      return { ...item, subtotal, nome };
+      return {
+        ...item,
+        subtotal
+      };
     })
+    // Profissionais devem aparecer se subtotal > 0
+    // (ou você pode remover o filtro se quiser que todos apareçam sempre)
     .filter(item => item.subtotal > 0)
     .forEach(item => {
       linhas.push([
         "Profissionais",
-        escape(item.cargo),     // ⭐ Aqui o nome aparece!
+        escape(item.cargo),   // ⭐ AGORA FUNCIONA
         item.pessoas,
         item.dias,
         item.prolabore,
         item.subtotal.toFixed(2)
       ].join(","));
     });
-    
   
   // Valores Únicos
   (orcamento.valoresUnicos || [])
