@@ -76,11 +76,11 @@ export function gerarCSV(orcamento, totais) {
 
   // Totais finais
   linhas.push("");
-  linhas.push(`Subtotal Geral,${totais.subtotalGeral.toFixed(2)}`);
-  linhas.push(`Total Indiretos,${totais.totalIndiretos.toFixed(2)}`);
-  linhas.push(`Impostos,${totais.impostos.toFixed(2)}`);
-  linhas.push(`Desconto,${totais.desconto.toFixed(2)}`);
-  linhas.push(`Total Final,${totais.totalGeral.toFixed(2)}`);
+  linhas.push(`Subtotal Geral,${(totais.subtotalGeral || 0).toFixed(2)}`);
+  linhas.push(`Total Indiretos,${(totais.totalIndiretos || 0).toFixed(2)}`);
+  linhas.push(`Impostos,${(totais.impostos || 0).toFixed(2)}`);
+  linhas.push(`Desconto,${(totais.desconto || 0).toFixed(2)}`);
+  linhas.push(`Total Final,${(totais.totalGeral || 0).toFixed(2)}`);
 
   return "\uFEFF" + linhas.join("\n");
 }
