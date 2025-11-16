@@ -48,33 +48,22 @@ export function gerarCSV(orcamento, totais) {
         (Number(item.prolabore) || 0) *
         (Number(item.pessoas) || 0);
   
-      const nomeProfissional =
-        item.categoria ||
-        item.nome ||
-        item.funcao ||
-        item.cargo ||
-        item.profissional ||
-        item.item ||
-        "Profissional";
+      const nome = item.cargo || item.profissional || item.item || "Profissional";
   
-      return {
-        ...item,
-        subtotal,
-        nomeProfissional
-      };
+      return { ...item, subtotal, nome };
     })
     .filter(item => item.subtotal > 0)
     .forEach(item => {
       linhas.push([
         "Profissionais",
-        escape(item.nomeProfissional),   // ⭐ Aqui corrigimos o nome!
+        escape(item.nome),     // ⭐ Aqui o nome aparece!
         item.pessoas,
         item.dias,
         item.prolabore,
         item.subtotal.toFixed(2)
       ].join(","));
     });
-  
+    
   
   // Valores Únicos
   (orcamento.valoresUnicos || [])
