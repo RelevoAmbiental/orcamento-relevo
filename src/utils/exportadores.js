@@ -56,7 +56,7 @@ export function gerarCSV(orcamento, totais) {
     .forEach(item => {
       linhas.push([
         "Profissionais",
-        escape(item.nome),     // ⭐ Aqui o nome aparece!
+        escape(item.cargo),     // ⭐ Aqui o nome aparece!
         item.pessoas,
         item.dias,
         item.prolabore,
