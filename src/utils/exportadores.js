@@ -32,7 +32,7 @@ export function gerarCSV(orcamento, totais) {
     .forEach(item => {
       linhas.push([
         "Coordenação",
-        escape(item.item),
+        escape(item.cargo),
         item.quant,
         item.dias,
         item.prolabore,
@@ -148,7 +148,7 @@ export async function gerarDOCX(orcamento, totais) {
     spacing: { after: 300 }
   });
 
-  // Builder de tabelas
+// Builder de tabelas
   const tabela = (titulo, dados) => {
     const linhas = [
       new TableRow({
@@ -160,18 +160,55 @@ export async function gerarDOCX(orcamento, totais) {
           new TableCell({ children: [new Paragraph("Subtotal")] }),
         ]
       }),
-
+  
       ...dados.map(d => new TableRow({
         children: [
-          new TableCell({ children: [new Paragraph(String(d.item || d.categoria || ""))] }),
-          new TableCell({ children: [new Paragraph(String(d.quant || d.pessoas || d.qtd || "—"))] }),
-          new TableCell({ children: [new Paragraph(String(d.dias || "—"))] }),
-          new TableCell({ children: [new Paragraph(toMoney(d.valor || d.prolabore))] }),
-          new TableCell({ children: [new Paragraph(toMoney(d.subtotal))] }),
+          // 👉 Nome correto da linha (coordenação usa cargo!)
+          new TableCell({
+            children: [
+              new Paragraph(String(
+                d.cargo || d.item || d.categoria || ""
+              ))
+            ]
+          }),
+  
+          // 👉 Quantidade correta (coordenação/ profissionais/logística)
+          new TableCell({
+            children: [
+              new Paragraph(String(
+                d.quant ?? d.pessoas ?? d.qtd ?? "—"
+              ))
+            ]
+          }),
+  
+          // 👉 Dias
+          new TableCell({
+            children: [
+              new Paragraph(String(d.dias ?? "—"))
+            ]
+          }),
+  
+          // 👉 Valor unitário (prolabore valor)
+          new TableCell({
+            children: [
+              new Paragraph(
+                toMoney(d.valor ?? d.prolabore ?? 0)
+              )
+            ]
+          }),
+  
+          // 👉 Subtotal (já calculado antes)
+          new TableCell({
+            children: [
+              new Paragraph(
+                toMoney(d.subtotal ?? 0)
+              )
+            ]
+          }),
         ]
       }))
     ];
-
+  
     return [
       new Paragraph({
         text: titulo,
@@ -185,41 +222,46 @@ export async function gerarDOCX(orcamento, totais) {
       new Paragraph(" "), // espaçamento
     ];
   };
-
+  
   const doc = new Document({
     sections: [{
       properties: {},
       children: [
         titulo,
-
+  
+        // COORDENAÇÃO
         ...tabela("Coordenação",
           (orcamento.coordenacao || []).map(i => ({
             ...i,
             subtotal: (i.dias / 30) * i.prolabore * i.quant
           }))
         ),
-
+  
+        // PROFISSIONAIS
         ...tabela("Profissionais",
           (orcamento.profissionais || []).map(i => ({
             ...i,
             subtotal: (i.dias / 30) * i.prolabore * i.pessoas
           }))
         ),
-
+  
+        // VALORES ÚNICOS
         ...tabela("Valores Únicos",
           (orcamento.valoresUnicos || []).map(i => ({
             ...i,
             subtotal: i.valor * i.pessoas * i.dias
           }))
         ),
-
+  
+        // LOGÍSTICA
         ...tabela("Logística",
           (orcamento.logistica || []).map(i => ({
             ...i,
             subtotal: i.valor * i.qtd * i.dias
           }))
         ),
-
+  
+        // TOTAIS FINAIS
         new Paragraph("Totais Gerais"),
         new Paragraph(`Subtotal Geral: ${toMoney(totais.subtotalGeral)}`),
         new Paragraph(`Total Indiretos: ${toMoney(totais.totalIndiretos)}`),
@@ -229,6 +271,7 @@ export async function gerarDOCX(orcamento, totais) {
       ]
     }]
   });
+
 
   return await Packer.toBlob(doc);
 }
