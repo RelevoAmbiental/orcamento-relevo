@@ -23,56 +23,80 @@ export function gerarCSV(orcamento, totais) {
   linhas.push("Categoria,Item,Quantidade,Dias,Valor Unitário,Subtotal");
 
   // Coordenação
-  (orcamento.coordenacao || []).forEach(item => {
-    const subtotal = (item.dias / 30) * item.prolabore * item.quant;
-    linhas.push([
-      "Coordenação",
-      escape(item.item),
-      item.quant,
-      item.dias,
-      item.prolabore,
-      subtotal.toFixed(2)
-    ].join(","));
-  });
-
+  (orcamento.coordenacao || [])
+    .map(item => ({
+      ...item,
+      subtotal: (item.dias / 30) * item.prolabore * item.quant
+    }))
+    .filter(item => item.subtotal > 0) // ✅ SOMENTE itens com subtotal > 0
+    .forEach(item => {
+      linhas.push([
+        "Coordenação",
+        escape(item.item),
+        item.quant,
+        item.dias,
+        item.prolabore,
+        item.subtotal.toFixed(2)
+      ].join(","));
+    });
+  
+  
   // Profissionais
-  (orcamento.profissionais || []).forEach(item => {
-    const subtotal = (item.dias / 30) * item.prolabore * item.pessoas;
-    linhas.push([
-      "Profissionais",
-      escape(item.categoria),
-      item.pessoas,
-      item.dias,
-      item.prolabore,
-      subtotal.toFixed(2)
-    ].join(","));
-  });
-
+  (orcamento.profissionais || [])
+    .map(item => ({
+      ...item,
+      subtotal: (item.dias / 30) * item.prolabore * item.pessoas
+    }))
+    .filter(item => item.subtotal > 0) // ✅ SOMENTE itens com subtotal > 0
+    .forEach(item => {
+      linhas.push([
+        "Profissionais",
+        escape(item.categoria),
+        item.pessoas,
+        item.dias,
+        item.prolabore,
+        item.subtotal.toFixed(2)
+      ].join(","));
+    });
+  
+  
   // Valores Únicos
-  (orcamento.valoresUnicos || []).forEach(item => {
-    const subtotal = item.valor * item.pessoas * item.dias;
-    linhas.push([
-      "Valores Únicos",
-      escape(item.item),
-      item.pessoas,
-      item.dias,
-      item.valor,
-      subtotal.toFixed(2)
-    ].join(","));
-  });
-
+  (orcamento.valoresUnicos || [])
+    .map(item => ({
+      ...item,
+      subtotal: item.valor * item.pessoas * item.dias
+    }))
+    .filter(item => item.subtotal > 0) // ✅ SOMENTE itens com subtotal > 0
+    .forEach(item => {
+      linhas.push([
+        "Valores Únicos",
+        escape(item.item),
+        item.pessoas,
+        item.dias,
+        item.valor,
+        item.subtotal.toFixed(2)
+      ].join(","));
+    });
+  
+  
   // Logística
-  (orcamento.logistica || []).forEach(item => {
-    const subtotal = item.valor * item.qtd * item.dias;
-    linhas.push([
-      "Logística",
-      escape(item.item),
-      item.qtd,
-      item.dias,
-      item.valor,
-      subtotal.toFixed(2)
-    ].join(","));
-  });
+  (orcamento.logistica || [])
+    .map(item => ({
+      ...item,
+      subtotal: item.valor * item.qtd * item.dias
+    }))
+    .filter(item => item.subtotal > 0) // ✅ SOMENTE itens com subtotal > 0
+    .forEach(item => {
+      linhas.push([
+        "Logística",
+        escape(item.item),
+        item.qtd,
+        item.dias,
+        item.valor,
+        item.subtotal.toFixed(2)
+      ].join(","));
+    });
+
 
   // Totais finais
   linhas.push("");
