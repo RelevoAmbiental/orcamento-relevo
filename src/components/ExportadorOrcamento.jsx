@@ -8,12 +8,20 @@ const ExportadorOrcamento = () => {
 
   const handleExportarDOCX = async () => {
     if (exportando) return;
-
+  
     setExportando(true);
     try {
       const blob = await gerarDOCX(orcamentoAtual, totais);
-      const nomeArquivo = `Orcamento_${orcamentoAtual.metadata.nome.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.docx`;
-      saveAs(blob, nomeArquivo);
+  
+      const nomeArquivo =
+        `Orcamento_${orcamentoAtual.metadata.nome.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.docx`;
+  
+      downloadArquivo(
+        blob,
+        nomeArquivo,
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      );
+  
     } catch (error) {
       console.error('Erro ao gerar DOCX:', error);
       alert('Erro ao gerar DOCX. Tente novamente.');
@@ -21,6 +29,7 @@ const ExportadorOrcamento = () => {
       setExportando(false);
     }
   };
+
 
   const handleExportarCSV = () => {
     if (exportando) return;
