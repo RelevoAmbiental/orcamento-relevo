@@ -40,18 +40,34 @@ export function gerarCSV(orcamento, totais) {
       ].join(","));
     });
   
-  
   // Profissionais
   (orcamento.profissionais || [])
-    .map(item => ({
-      ...item,
-      subtotal: (item.dias / 30) * item.prolabore * item.pessoas
-    }))
-    .filter(item => item.subtotal > 0) // ✅ SOMENTE itens com subtotal > 0
+    .map(item => {
+      const subtotal =
+        ((Number(item.dias) || 0) / 30) *
+        (Number(item.prolabore) || 0) *
+        (Number(item.pessoas) || 0);
+  
+      const nomeProfissional =
+        item.categoria ||
+        item.nome ||
+        item.funcao ||
+        item.cargo ||
+        item.profissional ||
+        item.item ||
+        "Profissional";
+  
+      return {
+        ...item,
+        subtotal,
+        nomeProfissional
+      };
+    })
+    .filter(item => item.subtotal > 0)
     .forEach(item => {
       linhas.push([
         "Profissionais",
-        escape(item.categoria),
+        escape(item.nomeProfissional),   // ⭐ Aqui corrigimos o nome!
         item.pessoas,
         item.dias,
         item.prolabore,
