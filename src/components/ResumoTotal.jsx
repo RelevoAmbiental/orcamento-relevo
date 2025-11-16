@@ -64,7 +64,7 @@ const ResumoTotal = () => {
 
           <LinhaTotal
             label="Subtotal de Custos Indiretos"
-            valor={subtotalIndiretos}
+            valor={totais.totalIndiretos}
             highlight
           />
         </div>
