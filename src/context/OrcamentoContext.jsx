@@ -237,6 +237,7 @@ const calcularTotais = (state) => {
     comissaoCaptacao,
 
     // Agregados
+    totalIndiretos: subtotalIndiretos,
     custoTotal,        // diretos + indiretos
     impostos,
     totalAntesDesconto,
